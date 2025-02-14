@@ -14,8 +14,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ThemeContext } from '../components/Provider';
-import { WeeklyActivityChart } from './WeeklyActivityChart';
-import { ExpenseStatisticsChart } from './ExpenseStatisticsChart';
+import dynamic from 'next/dynamic';
+
+const ExpenseStatisticsChartNoSSR = dynamic(
+  () => import('./ExpenseStatisticsChart').then(mod => mod.ExpenseStatisticsChart),
+  { ssr: false }
+);
+
+const WeeklyActivityChartNoSSR = dynamic(
+    () => import('./WeeklyActivityChart').then(mod => mod.WeeklyActivityChart),
+    { ssr: false }
+  );
 
 // Importa nossos componentes de gráfico baseados em ApexCharts
 
@@ -318,13 +327,13 @@ function DashboardPage() {
           {/* Gráfico de Barras */}
           <div className="w-full md:w-1/2">
             <h2 className="text-lg font-semibold mb-2">Weekly Activity</h2>
-            <WeeklyActivityChart />
+            <WeeklyActivityChartNoSSR />
           </div>
 
           {/* Gráfico de Pizza */}
           <div className="w-full md:w-1/2">
             <h2 className="text-lg font-semibold mb-2">Expense Statistics</h2>
-            <ExpenseStatisticsChart />
+            <ExpenseStatisticsChartNoSSR />
           </div>
         </CardContent>
       </Card>
