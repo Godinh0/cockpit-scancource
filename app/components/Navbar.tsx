@@ -51,7 +51,7 @@ export default function NavbarComponent() {
                             </Sheet>
                         </div>
                         <div
-                            className="h-12 w-12 bg-cover bg-center rounded-full ml-10"
+                            className="h-12 w-12 bg-cover bg-center rounded-full ml-2"
                             style={{
                                 backgroundImage: `url("https://avatars.githubusercontent.com/u/30700779?s=200&v=4")`,
                                 backgroundSize: 'cover',
@@ -59,6 +59,7 @@ export default function NavbarComponent() {
                                 backgroundRepeat: 'no-repeat'
                             }}
                         ></div>
+                        <span className="text-2xl ml-20 font-bold hover:bg-[#F5F7FA] text-[#EF7925] " >Dashboard</span>
                     </div>
                     <div className="flex items-center">
                         <DropdownMenu>

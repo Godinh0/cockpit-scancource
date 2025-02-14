@@ -9,21 +9,20 @@ export const metadata: Metadata = {
     title: 'Home',
     description: 'Home Page',
 }
-function RootLayout({ children }: {
-    children: React.ReactNode;
-}) {
+function RootLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div>
+        <div className="min-h-screen overflow-hidden">
             <NavbarComponent />
             <div className="flex">
-                <div className="hidden sm:block">
+                <div className="hidden sm:block w-30"> {/* Defina um tamanho fixo para o Sidebar */}
                     <SidebarMenu />
                 </div>
-                <main className="w-full p-4 bg-[#F5F7FA]">{children}</main>
+                <main className="flex-1 max-w-[calc(100vw-100px)] p-4 bg-[#F5F7FA] overflow-x-hidden">
+                    {children}
+                </main>
             </div>
         </div>
     );
 }
-
 
 export default RootLayout;
