@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 
 import { ThemeContext } from "../components/Provider";
+import { FileSpreadsheet } from "lucide-react";
 
 // Charts (ApexCharts) sem SSR
 const ExpenseStatisticsChartNoSSR = dynamic(
@@ -641,6 +642,16 @@ function DashboardPage() {
           </div>
         </CardContent>
       </Card>
+
+      <div className="mt-10 flex justify-end">
+        <button
+          onClick={() => window.open("/relatorio.xlsx", "_blank")}
+          className="flex items-center gap-2 px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded"
+        >
+          <FileSpreadsheet className="w-4 h-4" />
+          Gerar Relatório
+        </button>
+      </div>
 
       {/* Avatar */}
       <img 
