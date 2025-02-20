@@ -602,18 +602,15 @@ function DashboardPage() {
       {/* SEGUNDA TABELA */}
       <Card className="mt-5 p-3 shadow-sm">
         <CardContent className="flex">
-          <div className="flex-1 overflow-x-auto pr-10">
-            <Table>
-              <TableHeader>
-                <TableRow className="h-5 text-xs">
+          <div className="flex-1 overflow-x-auto">
+            <Table className="border-b">
+              <TableHeader className="bg-gray-50">
+                <TableRow className="text-xs">
                   {months.map((month) => (
-                    <TableHead key={month} className="w-32 text-left text-xs">
-                      {month}
-                      <div className="flex">
-                        <TableHead className="p-0 w-7 text-xs"></TableHead>
-                        <TableHead className="p-0 w-7 text-xs">DIO</TableHead>
-                        <TableHead className="py-0 w-7 text-xs">DIO DEC</TableHead>
-                      </div>
+                    <TableHead key={month} className="">
+                      <TableRow className="flex justify-center font-semibold">{month}</TableRow>
+                      <TableHead className="w-32">DIO</TableHead>
+                      <TableHead className="w-32">DIO DEC</TableHead>
                     </TableHead>
                   ))}
                 </TableRow>
@@ -626,12 +623,9 @@ function DashboardPage() {
                       if (!monthData) return <TableCell key={monthIndex} />;
 
                       return (
-                        <TableCell key={monthIndex} className="py-3 w-32 text-xs">
-                          <div className="flex gap-5 flex-row">
-                            <span className="py-0 w-5 text-xs"></span>
-                            <span className="py-0 w-5 text-xs">{monthData.dio}</span>
-                            <span className="py-0 w-5 text-xs">{monthData.dioDec}</span>
-                          </div>
+                        <TableCell key={monthIndex} className="text-xs py-0">
+                          <TableCell className="w-32">{monthData.dio}</TableCell>
+                          <TableCell className="w-32">{monthData.dioDec}</TableCell>
                         </TableCell>
                       );
                     })}
