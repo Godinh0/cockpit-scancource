@@ -205,7 +205,7 @@ function DashboardPage() {
         let updatedMonths = row.months.map((m:any, index:any) => {
             let dio = row.onHand - row.giroMes + m.back + m.decisao;
             let dioDec = dio / (row.giroMes / 30);
-            
+
             return {
                 ...m,
                 sugestao: (row.giroMes / 30) * row.leadTime - row.onHand - m.back,
@@ -214,9 +214,11 @@ function DashboardPage() {
             };
         });
 
-        // Propagação das decisões de forma acumulativa
-        for (let i = 1; i < updatedMonths.length; i++) {
-            updatedMonths[i].sugestao -= updatedMonths[i - 1].decisao;
+        // Propagação da decisão de forma acumulativa em todos os meses subsequentes
+        let decisaoAcumulada = 0;
+        for (let i = 0; i < updatedMonths.length; i++) {
+            updatedMonths[i].sugestao -= decisaoAcumulada;
+            decisaoAcumulada += updatedMonths[i].decisao;
         }
 
         return { ...row, months: updatedMonths };
@@ -232,11 +234,11 @@ const handleLeadTimeChange = (rowIndex:any, newLeadTime:any) => {
 };
 
 const handleDecisaoChange = (rowIndex:any, monthIndex:any, newDecisao:any) => {
-    setTableData((prev) => {
-        let updatedData = [...prev];
-        updatedData[rowIndex].months[monthIndex].decisao = newDecisao;
-        return recalculateSugestao(updatedData);
-    });
+  setTableData((prev) => {
+      let updatedData = [...prev];
+      updatedData[rowIndex].months[monthIndex].decisao = newDecisao;
+      return recalculateSugestao(updatedData);
+  });
 };
 
   // -------------------------------------------------------
