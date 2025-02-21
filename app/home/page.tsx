@@ -39,15 +39,16 @@ function DashboardPage() {
   const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
   // Mock de dados inicial
-  const calculateInitialSugestao = (onHand, giroMes, leadTime, back) => {
+  const calculateInitialSugestao = (onHand: number, giroMes: number, leadTime: number, back: number): number => {
     return (giroMes / 30) * leadTime - onHand - back;
   };
-  const calculateInitialDio = (onHand, giroMes, decisao, back) => {
+  
+  const calculateInitialDio = (onHand: number, giroMes: number, decisao: number, back: number): number => {
     return onHand - giroMes + decisao + back;
   };
-
-  const calculateInitialDioDec = (dio, giroMes, ) => {
-    return dio/30/giroMes ;
+  
+  const calculateInitialDioDec = (dio: number, giroMes: number): number => {
+    return dio / 30 / giroMes;
   };
 
   // Mock de dados inicial com sugestão já calculada
