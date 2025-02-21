@@ -200,9 +200,9 @@ function DashboardPage() {
   // -------------------------------------------------------
   // Ao editar LeadTime: recalcula "sugestao = baseSugestao + leadTime"
 
-  const recalculateSugestao = (data) => {
-    return data.map((row) => {
-        let updatedMonths = row.months.map((m, index) => {
+  const recalculateSugestao = (data:any) => {
+    return data.map((row:any) => {
+        let updatedMonths = row.months.map((m:any, index:any) => {
             let dio = row.onHand - row.giroMes + m.back + m.decisao;
             let dioDec = dio / (row.giroMes / 30);
             
@@ -223,7 +223,7 @@ function DashboardPage() {
     });
 };
 
-const handleLeadTimeChange = (rowIndex, newLeadTime) => {
+const handleLeadTimeChange = (rowIndex:any, newLeadTime:any) => {
     setTableData((prev) => {
         let updatedData = [...prev];
         updatedData[rowIndex].leadTime = newLeadTime;
@@ -231,7 +231,7 @@ const handleLeadTimeChange = (rowIndex, newLeadTime) => {
     });
 };
 
-const handleDecisaoChange = (rowIndex, monthIndex, newDecisao) => {
+const handleDecisaoChange = (rowIndex:any, monthIndex:any, newDecisao:any) => {
     setTableData((prev) => {
         let updatedData = [...prev];
         updatedData[rowIndex].months[monthIndex].decisao = newDecisao;
