@@ -30,6 +30,7 @@
     "@tanstack/react-table": "^8.10.7",
     "@typescript-eslint/eslint-plugin": "^6.12.0",
     "@typescript-eslint/parser": "^6.12.0",
+    "antd": "^5.24.1",
     "apexcharts": "^4.4.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",

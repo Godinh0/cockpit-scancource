@@ -2,11 +2,10 @@
 
 import React, { useContext, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-
+import {  Input } from 'antd';
 // ShadCN/UI
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -37,6 +36,21 @@ function DashboardPage() {
   // -------------------------------------------------------
   // MOCK DE DADOS
   // -------------------------------------------------------
+  const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+  // Mock de dados inicial
+  const calculateInitialSugestao = (onHand, giroMes, leadTime, back) => {
+    return (giroMes / 30) * leadTime - onHand - back;
+  };
+  const calculateInitialDio = (onHand, giroMes, decisao, back) => {
+    return onHand - giroMes + decisao + back;
+  };
+
+  const calculateInitialDioDec = (dio, giroMes, ) => {
+    return dio/30/giroMes ;
+  };
+
+  // Mock de dados inicial com sugestão já calculada
   const [tableData, setTableData] = useState([
     {
       vendor: "ZEBRA",
@@ -48,263 +62,94 @@ function DashboardPage() {
       dioAtual: 58,
       dioIdeal: 90,
       leadTime: 60,
-      months: [
-        {
-          month: "Jan",
-          back: 10,
-          baseSugestao: 20,
-          sugestao: 20,
-          decisao: 0,
-          baseDio: 100,
-          dio: 100,
-          dioDec: 100,
-        },
-        {
-          month: "Fev",
-          back: 0,
-          baseSugestao: 30,
-          sugestao: 30,
-          decisao: 0,
-          baseDio: 120,
-          dio: 120,
-          dioDec: 120,
-        },
-        {
-          month: "Mar",
-          back: 0,
-          baseSugestao: 5,
-          sugestao: 5,
-          decisao: 5,
-          baseDio: 80,
-          dio: 80,
-          dioDec: 85,
-        },
-        {
-          month: "Abr",
-          back: 12,
-          baseSugestao: 0,
-          sugestao: 0,
-          decisao: 0,
-          baseDio: 140,
-          dio: 140,
-          dioDec: 140,
-        },
-        {
-          month: "Mai",
-          back: 0,
-          baseSugestao: 50,
-          sugestao: 50,
-          decisao: 0,
-          baseDio: 150,
-          dio: 150,
-          dioDec: 150,
-        },
-        {
-          month: "Jun",
-          back: 0,
-          baseSugestao: 10,
-          sugestao: 10,
-          decisao: 5,
-          baseDio: 60,
-          dio: 60,
-          dioDec: 65,
-        },
-        {
-          month: "Jul",
-          back: 0,
-          baseSugestao: 0,
-          sugestao: 0,
-          decisao: 0,
-          baseDio: 0,
-          dio: 0,
-          dioDec: 0,
-        },
-        {
-          month: "Ago",
-          back: 0,
-          baseSugestao: 10,
-          sugestao: 10,
-          decisao: 0,
-          baseDio: 200,
-          dio: 200,
-          dioDec: 200,
-        },
-        {
-          month: "Set",
-          back: 0,
-          baseSugestao: 0,
-          sugestao: 0,
-          decisao: 0,
-          baseDio: 90,
-          dio: 90,
-          dioDec: 90,
-        },
-        {
-          month: "Out",
-          back: 0,
-          baseSugestao: 25,
-          sugestao: 25,
-          decisao: 0,
-          baseDio: 200,
-          dio: 200,
-          dioDec: 200,
-        },
-        {
-          month: "Nov",
-          back: 0,
-          baseSugestao: 0,
-          sugestao: 0,
-          decisao: 20,
-          baseDio: 0,
-          dio: 0,
-          dioDec: 20,
-        },
-        {
-          month: "Dez",
-          back: 0,
-          baseSugestao: 150,
-          sugestao: 150,
-          decisao: 0,
-          baseDio: 1000,
-          dio: 1000,
-          dioDec: 1000,
-        },
-      ],
+      months: months.map((month, index) => ({
+        month,
+        back: 0,
+        sugestao: calculateInitialSugestao(228, 117, 60, 0), 
+        decisao: 0,
+        dio: calculateInitialDio(228, 117, 0, 0),
+        dioDec: calculateInitialDioDec(calculateInitialDio(228, 117, 0, 0), 117)
+      })),
     },
     {
       vendor: "ZEBRA",
-      partnOrig: "MC330X-GE4E64RW BR",
-      partnSS: "MC330X-GE4E64RW_BR_SC",
+      partnOrig: "MC330L-GE4EG4RW BR",
+      partnSS: "MC330L-GE4EG4RW BR_SC",
       category: "COLETOR COM TECLADO",
       onHand: 534,
       giroMes: 93,
       dioAtual: 171,
       dioIdeal: 90,
-      leadTime: 45,
-      months: [
-        {
-          month: "Jan",
-          back: 5,
-          baseSugestao: 20,
-          sugestao: 20,
-          decisao: 0,
-          baseDio: 10,
-          dio: 10,
-          dioDec: 10,
-        },
-        {
-          month: "Fev",
-          back: 0,
-          baseSugestao: 3,
-          sugestao: 3,
-          decisao: 0,
-          baseDio: 30,
-          dio: 30,
-          dioDec: 30,
-        },
-        {
-          month: "Mar",
-          back: 10,
-          baseSugestao: 10,
-          sugestao: 10,
-          decisao: 5,
-          baseDio: 40,
-          dio: 40,
-          dioDec: 45,
-        },
-        {
-          month: "Abr",
-          back: 0,
-          baseSugestao: 50,
-          sugestao: 50,
-          decisao: 0,
-          baseDio: 100,
-          dio: 100,
-          dioDec: 100,
-        },
-        {
-          month: "Mai",
-          back: 0,
-          baseSugestao: 70,
-          sugestao: 70,
-          decisao: 10,
-          baseDio: 200,
-          dio: 200,
-          dioDec: 210,
-        },
-        {
-          month: "Jun",
-          back: 0,
-          baseSugestao: 0,
-          sugestao: 0,
-          decisao: 0,
-          baseDio: 50,
-          dio: 50,
-          dioDec: 50,
-        },
-        {
-          month: "Jul",
-          back: 0,
-          baseSugestao: 10,
-          sugestao: 10,
-          decisao: 5,
-          baseDio: 80,
-          dio: 80,
-          dioDec: 85,
-        },
-        {
-          month: "Ago",
-          back: 0,
-          baseSugestao: 5,
-          sugestao: 5,
-          decisao: 0,
-          baseDio: 100,
-          dio: 100,
-          dioDec: 100,
-        },
-        {
-          month: "Set",
-          back: 0,
-          baseSugestao: 35,
-          sugestao: 35,
-          decisao: 0,
-          baseDio: 200,
-          dio: 200,
-          dioDec: 200,
-        },
-        {
-          month: "Out",
-          back: 0,
-          baseSugestao: 0,
-          sugestao: 0,
-          decisao: 0,
-          baseDio: 90,
-          dio: 90,
-          dioDec: 90,
-        },
-        {
-          month: "Nov",
-          back: 0,
-          baseSugestao: 120,
-          sugestao: 120,
-          decisao: 0,
-          baseDio: 400,
-          dio: 400,
-          dioDec: 400,
-        },
-        {
-          month: "Dez",
-          back: 0,
-          baseSugestao: 200,
-          sugestao: 200,
-          decisao: 0,
-          baseDio: 600,
-          dio: 600,
-          dioDec: 600,
-        },
-      ],
+      leadTime: 60,
+      months: months.map((month, index) => ({
+        month,
+        back: 0,
+        sugestao: calculateInitialSugestao(534, 93, 60, 0),
+        decisao: 0,
+        dio: calculateInitialDio(534, 93, 0, 0),
+        dioDec: calculateInitialDioDec(calculateInitialDio(534, 93, 0, 0), 93)
+      })),
     },
+    {
+      vendor: "ZEBRA",
+      partnOrig: "MC330L-GJ4EG4RW BR",
+      partnSS: "MC330L-GJ4EG4RW BR_SC",
+      category: "COLETOR COM TECLADO",
+      onHand: 95,
+      giroMes: 88,
+      dioAtual: 33,
+      dioIdeal: 90,
+      leadTime: 60,
+      months: months.map((month, index) => ({
+        month,
+        back: 0,
+        sugestao: calculateInitialSugestao(95, 88, 60, 0),
+        decisao: 0,
+        dio: calculateInitialDio(95, 88, 0, 0),
+        dioDec: calculateInitialDioDec(calculateInitialDio(95, 88, 0, 0), 88)
+      })),
+    },
+    {
+      vendor: "ZEBRA",
+      partnOrig: "MC330X-GE4EG4RW BR",
+      partnSS: "MC330X-GE4EG4RW BR_SC",
+      category: "COLETOR COM TECLADO",
+      onHand: 187,
+      giroMes: 14,
+      dioAtual: 390,
+      dioIdeal: 90,
+      leadTime: 60,
+      months: months.map((month, index) => ({
+        month,
+        back: 0,
+        sugestao: calculateInitialSugestao(187, 14, 60, 0),
+        decisao: 0,
+        dio: calculateInitialDio(187, 14, 0, 0),
+        dioDec: calculateInitialDioDec(calculateInitialDio(187, 14, 0, 0), 14)
+      })),
+    },
+    {
+      vendor: "ZEBRA",
+      partnOrig: "MC930B-GSEDG4RW",
+      partnSS: "MC930B-GSEDG4RW_SC",
+      category: "COLETOR COM TECLADO",
+      onHand: 212,
+      giroMes: 88,
+      dioAtual: 73,
+      dioIdeal: 75,
+      leadTime: 45,
+      months: months.map((month, index) => ({
+        month,
+        back: 0,
+        sugestao: calculateInitialSugestao(212, 88, 45, 0),
+        decisao: 0,
+        dio: calculateInitialDio(212, 88, 0, 0),
+        dioDec: calculateInitialDioDec(calculateInitialDio(212, 88, 0, 0), 88)
+      })),
+    } 
   ]);
+  
+
 
   // -------------------------------------------------------
   // ESTADOS PARA FILTROS
@@ -337,8 +182,6 @@ function DashboardPage() {
     return Array.from(setS);
   }, [tableData]);
 
-  // Meses
-  const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
   // -------------------------------------------------------
   // APLICAÇÃO DE FILTROS
@@ -355,43 +198,45 @@ function DashboardPage() {
   // MANIPULADORES
   // -------------------------------------------------------
   // Ao editar LeadTime: recalcula "sugestao = baseSugestao + leadTime"
-  const handleLeadTimeChange = (rowIndex: number, newLeadTime: number) => {
-    setTableData((prev) =>
-      prev.map((row, i) => {
-        if (i !== rowIndex) return row;
-        const updatedMonths = row.months.map((m) => ({
-          ...m,
-          sugestao: m.baseSugestao + newLeadTime,
-        }));
-        return {
-          ...row,
-          leadTime: newLeadTime,
-          months: updatedMonths,
-        };
-      })
-    );
-  };
 
-  // Ao editar Decisão: recalcula "dioDec = baseDio + decisao"
-  const handleDecisaoChange = (rowIndex: number, monthIndex: number, newDecisao: number) => {
-    setTableData((prev) =>
-      prev.map((row, i) => {
-        if (i !== rowIndex) return row;
-        const updatedMonths = row.months.map((m, mi) => {
-          if (mi !== monthIndex) return m;
-          return {
-            ...m,
-            decisao: newDecisao,
-            dioDec: m.baseDio + newDecisao,
-          };
+  const recalculateSugestao = (data) => {
+    return data.map((row) => {
+        let updatedMonths = row.months.map((m, index) => {
+            let dio = row.onHand - row.giroMes + m.back + m.decisao;
+            let dioDec = dio / (row.giroMes / 30);
+            
+            return {
+                ...m,
+                sugestao: (row.giroMes / 30) * row.leadTime - row.onHand - m.back,
+                dio,
+                dioDec
+            };
         });
-        return {
-          ...row,
-          months: updatedMonths,
-        };
-      })
-    );
-  };
+
+        // Propagação das decisões de forma acumulativa
+        for (let i = 1; i < updatedMonths.length; i++) {
+            updatedMonths[i].sugestao -= updatedMonths[i - 1].decisao;
+        }
+
+        return { ...row, months: updatedMonths };
+    });
+};
+
+const handleLeadTimeChange = (rowIndex, newLeadTime) => {
+    setTableData((prev) => {
+        let updatedData = [...prev];
+        updatedData[rowIndex].leadTime = newLeadTime;
+        return recalculateSugestao(updatedData);
+    });
+};
+
+const handleDecisaoChange = (rowIndex, monthIndex, newDecisao) => {
+    setTableData((prev) => {
+        let updatedData = [...prev];
+        updatedData[rowIndex].months[monthIndex].decisao = newDecisao;
+        return recalculateSugestao(updatedData);
+    });
+};
 
   // -------------------------------------------------------
   // CHAT (MOCK)
@@ -413,6 +258,8 @@ function DashboardPage() {
       setMessages((prev) => [...prev, { id: Date.now(), sender: "iazzie", text: "Carregando..." }]);
     }, 400);
   };
+
+  
 
   return (
     <>
@@ -505,94 +352,100 @@ function DashboardPage() {
 
       {/* PRIMEIRA TABELA */}
       <Card className="mt-5 p-3 shadow-sm">
-        <CardContent className="flex">
-          {/* Colunas iniciais */}
-          <div className="w-[900px] mt-5">
-            <Table>
-              <TableHeader>
-                <TableRow className="h-5 text-xs">
+        <CardContent className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="h-5 text-xs">
                   <TableHead className="py-0 w-24">Vendor</TableHead>
-                  <TableHead className="py-0 w-32">PARTN ORIG</TableHead>
-                  <TableHead className="py-0 w-40">PARTN SS</TableHead>
+                  <TableHead className="py-0 w-52">PARTN ORIG</TableHead>
+                  <TableHead className="py-0 w-52">PARTN SS</TableHead>
                   <TableHead className="py-0 w-32">Categoria</TableHead>
-                  <TableHead className="py-0 w-10">OnHand</TableHead>
-                  <TableHead className="py-0 w-10">Giro Mês</TableHead>
-                  <TableHead className="py-0 w-10">DIO Atual</TableHead>
-                  <TableHead className="py-0 w-10">DIO Ideal</TableHead>
+                <TableHead className="w-32 pl-10 pb-5 text-left">
+                <span className="text-sm font-semibold text-[#EF7925]">Atual</span>
+                  <TableHead className="p-0 w-10">OnHand</TableHead>
+                  <TableHead className="py-0 pl-6 w-16">Giro Mês</TableHead>
+                  <TableHead className="py-0 w-16">DIO Atual</TableHead>
+                  <TableHead className="py-0 w-16">DIO Ideal</TableHead>
                   <TableHead className="py-0 w-16">Lead Time</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredData.map((row, rowIndex) => (
-                  <TableRow key={rowIndex}>
-                    <TableCell className="py-1 text-xs">{row.vendor}</TableCell>
-                    <TableCell className="py-1 text-[10px]">{row.partnOrig}</TableCell>
-                    <TableCell className="py-1 text-[10px]">{row.partnSS}</TableCell>
-                    <TableCell className="py-1 text-[10px]">{row.category}</TableCell>
-                    <TableCell className="py-1 text-xs">{row.onHand}</TableCell>
-                    <TableCell className="py-1 text-xs">{row.giroMes}</TableCell>
-                    <TableCell className="py-1 text-xs">{row.dioAtual}</TableCell>
-                    <TableCell className="py-1 text-xs">{row.dioIdeal}</TableCell>
-                    <TableCell className="py-1 text-xs">
-                      <Input
-                        type="number"
-                        className="w-16 text-xs"
-                        value={row.leadTime}
-                        onChange={(e) => handleLeadTimeChange(rowIndex, Number(e.target.value))}
-                      />
-                    </TableCell>
-                  </TableRow>
+                </TableHead>
+                <TableHead className="w-32 text-left">
+                <span className="text-sm font-semibold text-[#EF7925]">Entradas</span>
+                {months.map((month) => (
+                  <TableHead key={month} className="px-0 w-32 pr-10 text-left">
+                    {month}
+                    <div className="flex">
+                      <TableHead className="p-0 w-10 text-xs">Back</TableHead>
+                      <TableHead className="py-0 w-20 text-xs">Sugestão</TableHead>
+                      <TableHead className="py-0 w-32 text-xs">Justificativa</TableHead>
+                      <TableHead className="py-0 w-16 text-xs">Decisão</TableHead>
+                    </div>
+                  </TableHead>
                 ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          {/* Colunas de meses (scroll) */}
-          <div className="flex-1 overflow-x-auto ml-4 pr-10">
-            <Table>
-              <TableHeader>
-                <TableRow className="h-5 text-xs">
-                  {months.map((month) => (
-                    <TableHead key={month} className="w-32 text-left">
-                      {month}
-                      <div className="flex">
-                        <TableHead className="p-0 w-16 text-xs">Back</TableHead>
-                        <TableHead className="py-0 w-16 text-xs">Sugestão</TableHead>
-                        <TableHead className="py-0 w-16 text-xs">Decisão</TableHead>
+                 </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredData.map((row, rowIndex) => (
+                <TableRow key={rowIndex}>
+                  <TableCell className="py-1 text-xs">{row.vendor}</TableCell>
+                  <TableCell className="py-1 text-[10px]">{row.partnOrig}</TableCell>
+                  <TableCell className="py-1 text-[10px]">{row.partnSS}</TableCell>
+                  <TableCell className="py-1 text-[10px]">{row.category}</TableCell>
+                  <TableCell className="pr-10">
+                    <div className="flex gap-7 pl-8 flex-row">
+                      <span className="py-1 text-xs">{row.onHand}</span>
+                      <span className="py-1 pl-2 text-xs">{row.giroMes}</span>
+                      <span className="py-1 pl-2 text-xs">{row.dioAtual}</span>
+                      <span className="py-1 pl-5  text-xs">{row.dioIdeal}</span>
+                      <div className="pl-3 " >
+                        <Input
+                          type="number"
+                          className="w-16 text-center text-xs"
+                          value={row.leadTime}
+                          onChange={(e) => handleLeadTimeChange(rowIndex, Number(e.target.value))}
+                        />
                       </div>
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredData.map((row, rowIndex) => (
-                  <TableRow key={rowIndex} className="py-2">
-                    {months.map((_, monthIndex) => {
-                      const monthData = row.months[monthIndex];
-                      if (!monthData) return <TableCell key={monthIndex} />;
-
-                      return (
-                        <TableCell key={monthIndex} className="flex-row py-2 w-32 text-xs">
-                          <div className="flex gap-5 flex-row">
-                            <span className="py-0 w-10 text-xs">{monthData.back}</span>
-                            <span className="py-0 w-10 text-xs">{monthData.sugestao}</span>
-                            <Input
-                              type="number"
-                              className="w-16 text-xs"
-                              value={monthData.decisao}
-                              onChange={(e) =>
-                                handleDecisaoChange(rowIndex, monthIndex, Number(e.target.value))
+                    </div>  
+                  </TableCell>
+                  <div className="flex pl-7 flex-row">
+                  {months.map((_, monthIndex) => {
+                    const monthData = row.months[monthIndex];
+                    if (!monthData) return <TableCell key={monthIndex} />;
+                    return (
+                      <TableCell key={monthIndex} className="p-0  py-2 text-xs">
+                        <div className="flex gap-3 w-[352px] flex-row ">
+                          <span className="py-0 p-0 w-10 text-xs">{monthData.back}</span>
+                          <span className="py-0 w-14 text-xs">{monthData.sugestao}</span>
+                          <span className="py-0 w-28 text-[10px]">
+                            {(() => {
+                              if (monthData.sugestao > 1000) {
+                                return 'Grande compra necessária';
+                              } else if (monthData.sugestao >= 100 && monthData.sugestao <= 1000) {
+                                return 'Compra de médio porte';
+                              } else if (monthData.sugestao >= 1 && monthData.sugestao < 100) {
+                                return 'Pequena compra necessária';
+                              } else if (monthData.sugestao === 0) {
+                                return 'Sem necessidade de compra';
+                              } else {
+                                return 'Reduzir estoque atual';
                               }
-                            />
+                            })()}
+                          </span>
+                          <Input
+                            type="number"
+                            className="w-16 text-center text-xs"
+                            value={monthData.decisao}
+                            onChange={(e) => handleDecisaoChange(rowIndex, monthIndex, Number(e.target.value))}
+                          />
                           </div>
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                      </TableCell>
+                    );
+                  })}
+                  </div>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
       <div className="mt-10">    
@@ -625,7 +478,7 @@ function DashboardPage() {
                       return (
                         <TableCell key={monthIndex} className="text-xs py-0">
                           <TableCell className="w-32">{monthData.dio}</TableCell>
-                          <TableCell className="w-32">{monthData.dioDec}</TableCell>
+                          <TableCell className="w-32">{monthData.dioDec.toFixed(0)}</TableCell>
                         </TableCell>
                       );
                     })}
@@ -715,11 +568,11 @@ function DashboardPage() {
       <Card className="mt-5 p-4 shadow-sm">
         <CardContent className="flex flex-wrap md:flex-nowrap gap-5">
           <div className="w-full md:w-1/2">
-            <h2 className="text-lg font-semibold mb-2">Weekly Activity</h2>
+            <h2 className="text-lg font-semibold mb-2">Atividade Semanal</h2>
             <WeeklyActivityChartNoSSR />
           </div>
           <div className="w-full md:w-1/2">
-            <h2 className="text-lg font-semibold mb-2">Expense Statistics</h2>
+            <h2 className="text-lg font-semibold mb-2">Percentual de Saídas por Categoria</h2>
             <ExpenseStatisticsChartNoSSR />
           </div>
         </CardContent>

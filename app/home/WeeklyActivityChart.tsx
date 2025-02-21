@@ -39,11 +39,11 @@ export function WeeklyActivityChart() {
 
   const series = [
     {
-      name: 'Deposit',
+      name: 'Saídas',
       data: dataDeposit,
     },
     {
-      name: 'Withdraw',
+      name: 'Entradas',
       data: dataWithdraw,
     },
   ];

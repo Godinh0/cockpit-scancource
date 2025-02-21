@@ -5,7 +5,7 @@ import Chart from 'react-apexcharts';
 export function ExpenseStatisticsChart() {
   // Dados simulados
   const dataPie = [30, 15, 20, 35];
-  const labels = ['Entertainment', 'Bill Expense', 'Investment', 'Others'];
+  const labels = ['Coletor com teclado', 'Pulseira', 'Acessorio coletor', 'Carregador'];
 
   const options: ApexCharts.ApexOptions = {
     labels,
