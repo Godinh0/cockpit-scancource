@@ -1,7 +1,7 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { ChevronDownIcon, Home } from "lucide-react";
+import { ChevronDownIcon, FileSpreadsheet, Home } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 
@@ -25,6 +25,12 @@ export function SidebarMenu() {
             label: "",
             name: "Dashboard",
             icon: <Home color="#EF7925" size={24} />, // Aumenta o tamanho do ícone
+            href: "/home",
+        },
+        {
+            label: "",
+            name: "Relatório",
+            icon: <FileSpreadsheet color="#EF7925" size={24} />, // Aumenta o tamanho do ícone
             href: "/home",
         },
     ];
