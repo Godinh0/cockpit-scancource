@@ -509,7 +509,7 @@ function DashboardPage() {
                   {/* Limitando a exibição dos meses */}
                   {months.slice(0, numMonthsToShow).map((month) => (
                     <TableHead key={month} className="px-0 w-32 pr-10 text-left">
-                      {month}
+                       <span className="text-base font-semibold">{month}</span>
                       <div className="flex">
                         <TableHead className="p-0 w-16">OnHand</TableHead>
                         <TableHead className="p-0 w-14 text-xs">Back</TableHead>
