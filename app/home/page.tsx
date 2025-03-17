@@ -7,7 +7,14 @@ import { Input, Slider, Select } from "antd";
 const { Option } = Select;
 // ShadCN/UI
 import { Card, CardContent } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import { ThemeContext } from "../components/Provider";
 import { FileSpreadsheet } from "lucide-react";
@@ -17,46 +24,65 @@ const ExpenseStatisticsChartNoSSR = dynamic(
   () => import("./ExpenseStatisticsChart").then((mod) => mod.ExpenseStatisticsChart),
   { ssr: false }
 );
-
 const WeeklyActivityChartNoSSR = dynamic(
   () => import("./WeeklyActivityChart").then((mod) => mod.WeeklyActivityChart),
   { ssr: false }
 );
 
 /**
- * Função utilitária para converter o valor de sugestão (sugestao)
- * em um status textual de acordo com a lógica especificada.
+ * Função que retorna o status para cada mês, com base em onHand, back, giro, dio, leadTime etc.
+ * Ajuste as regras conforme sua necessidade.
  */
-function getStatusBySugestao(sugestao: number): string {
-  if (sugestao > 1000) {
-    return "Grande compra necessária";
-  } else if (sugestao >= 100 && sugestao <= 1000) {
-    return "Compra de médio porte";
-  } else if (sugestao >= 1 && sugestao < 100) {
-    return "Pequena compra necessária";
-  } else if (sugestao === 0) {
-    return "Sem necessidade de compra";
-  } else {
-    return "Reduzir estoque atual";
+function getNewStatus({ onHand, back, giro, dio, leadTime }) {
+  const total = onHand + back;
+  const ratio = giro > 0 ? total / giro : 0;
+  const leadRatio = leadTime / 30; // Exemplo: converter leadTime (dias) para "meses"
+
+  // Exemplo de regras (adapte conforme sua necessidade):
+  if (total < giro && ratio < leadRatio) {
+    return "COMPRA IMEDIATA";
+  } else if (total >= giro && ratio < 3) {
+    return "ESTOQUE OK";
+  } else if (ratio > 3) {
+    return "ALERTA AGING";
+  } else if (total < giro && ratio > leadRatio) {
+    return "RUPTURA DE ESTOQUE";
   }
+  // Caso não se encaixe em nenhuma das acima, retorne string vazia ou outro status
+  return "";
 }
 
 function DashboardPage() {
   const theme = useContext(ThemeContext);
 
   // -------------------------------------------------------
-  // Mock de dados (iniciais)
+  // Meses
   // -------------------------------------------------------
-  const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+  const months = [
+    "Jan",
+    "Fev",
+    "Mar",
+    "Abr",
+    "Mai",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Set",
+    "Out",
+    "Nov",
+    "Dez",
+  ];
 
-  // Funções auxiliares para cálculo inicial
+  // -------------------------------------------------------
+  // Funções auxiliares iniciais
+  // -------------------------------------------------------
   const calculateInitialSugestao = (
     onHand: number,
     giroMes: number,
     leadTime: number,
     back: number
   ): number => {
-    return Math.round((onHand + back - giroMes) / giroMes * 30);
+    return Math.round(((onHand + back - giroMes) / giroMes) * 30);
   };
 
   const calculateInitialDio = (
@@ -66,14 +92,16 @@ function DashboardPage() {
     back: number,
     dioIdeal: number
   ): number => {
-    return Math.round((onHand + back + sugestao - giroMes) / dioIdeal * 30);
+    return Math.round(((onHand + back + sugestao - giroMes) / dioIdeal) * 30);
   };
 
-  const calculateInitialDioDec = (dio: number, giroMes: number): number => {
+  const calculateInitialDioDec = (dio: number): number => {
     return Math.round(dio);
   };
 
-  // Exemplo de dados com um ID único para evitar problemas de "rowIndex"
+  // -------------------------------------------------------
+  // Dados iniciais (tableData)
+  // -------------------------------------------------------
   const [tableData, setTableData] = useState([
     {
       id: "row-1",
@@ -88,17 +116,23 @@ function DashboardPage() {
       leadTime: 60,
       months: months.map(() => {
         const sugestao = calculateInitialSugestao(228, 117, 60, 0);
+        const dio = calculateInitialDio(228, 117, sugestao, 0, 90);
         return {
           back: 0,
           onHandMonth: 228 - 117,
           sugestao,
           decisao: 0,
           giro: 117,
-          dio: calculateInitialDio(228, 117, sugestao, 0, 90),
-          dioDec: calculateInitialDioDec(
-            calculateInitialDio(228, 117, sugestao, 0, 90),
-            117
-          ),
+          dio,
+          dioDec: calculateInitialDioDec(dio),
+          // Calcula status inicial
+          status: getNewStatus({
+            onHand: 228 - 117,
+            back: 0,
+            giro: 117,
+            dio,
+            leadTime: 60,
+          }),
         };
       }),
     },
@@ -115,17 +149,22 @@ function DashboardPage() {
       leadTime: 60,
       months: months.map(() => {
         const sugestao = calculateInitialSugestao(534, 93, 60, 0);
+        const dio = calculateInitialDio(534, 93, sugestao, 0, 90);
         return {
           back: 0,
           onHandMonth: 534 - 93,
           sugestao,
           decisao: 0,
           giro: 93,
-          dio: calculateInitialDio(534, 93, sugestao, 0, 90),
-          dioDec: calculateInitialDioDec(
-            calculateInitialDio(534, 93, sugestao, 0, 90),
-            93
-          ),
+          dio,
+          dioDec: calculateInitialDioDec(dio),
+          status: getNewStatus({
+            onHand: 534 - 93,
+            back: 0,
+            giro: 93,
+            dio,
+            leadTime: 60,
+          }),
         };
       }),
     },
@@ -142,17 +181,22 @@ function DashboardPage() {
       leadTime: 60,
       months: months.map(() => {
         const sugestao = calculateInitialSugestao(95, 88, 60, 0);
+        const dio = calculateInitialDio(95, 88, sugestao, 0, 90);
         return {
           back: 0,
           onHandMonth: 95 - 88,
           sugestao,
           decisao: 0,
           giro: 88,
-          dio: calculateInitialDio(95, 88, sugestao, 0, 90),
-          dioDec: calculateInitialDioDec(
-            calculateInitialDio(95, 88, sugestao, 0, 90),
-            88
-          ),
+          dio,
+          dioDec: calculateInitialDioDec(dio),
+          status: getNewStatus({
+            onHand: 95 - 88,
+            back: 0,
+            giro: 88,
+            dio,
+            leadTime: 60,
+          }),
         };
       }),
     },
@@ -169,17 +213,22 @@ function DashboardPage() {
       leadTime: 60,
       months: months.map(() => {
         const sugestao = calculateInitialSugestao(187, 14, 60, 0);
+        const dio = calculateInitialDio(187, 14, sugestao, 0, 90);
         return {
           back: 0,
           onHandMonth: 187 - 14,
           sugestao,
           decisao: 0,
           giro: 14,
-          dio: calculateInitialDio(187, 14, sugestao, 0, 90),
-          dioDec: calculateInitialDioDec(
-            calculateInitialDio(187, 14, sugestao, 0, 90),
-            14
-          ),
+          dio,
+          dioDec: calculateInitialDioDec(dio),
+          status: getNewStatus({
+            onHand: 187 - 14,
+            back: 0,
+            giro: 14,
+            dio,
+            leadTime: 60,
+          }),
         };
       }),
     },
@@ -196,17 +245,22 @@ function DashboardPage() {
       leadTime: 45,
       months: months.map(() => {
         const sugestao = calculateInitialSugestao(212, 88, 45, 0);
+        const dio = calculateInitialDio(212, 88, sugestao, 0, 75);
         return {
           back: 0,
           onHandMonth: 212 - 88,
           sugestao,
           decisao: 0,
           giro: 88,
-          dio: calculateInitialDio(212, 88, sugestao, 0, 75),
-          dioDec: calculateInitialDioDec(
-            calculateInitialDio(212, 88, sugestao, 0, 75),
-            88
-          ),
+          dio,
+          dioDec: calculateInitialDioDec(dio),
+          status: getNewStatus({
+            onHand: 212 - 88,
+            back: 0,
+            giro: 88,
+            dio,
+            leadTime: 45,
+          }),
         };
       }),
     },
@@ -219,7 +273,10 @@ function DashboardPage() {
   const [category, setCategory] = useState("All");
   const [partnOrig, setPartnOrig] = useState("All");
   const [partnSS, setPartnSS] = useState("All");
+
+  // Agora o statusFilter terá as opções: "COMPRA IMEDIATA", "ESTOQUE OK", "ALERTA AGING", "RUPTURA DE ESTOQUE", etc. + "All"
   const [statusFilter, setStatusFilter] = useState("All");
+
   const [searchText, setSearchText] = useState("");
 
   // Slider para escolher quantos meses exibir
@@ -249,7 +306,7 @@ function DashboardPage() {
   }, [tableData]);
 
   // -------------------------------------------------------
-  // LÓGICA DE FILTRO
+  // LÓGICA DE FILTRO (usando m.status)
   // -------------------------------------------------------
   const filteredData = tableData.filter((item) => {
     const matchesVendor = vendor === "All" || item.vendor === vendor;
@@ -267,43 +324,60 @@ function DashboardPage() {
     ].join(" ").toLowerCase();
     const matchesSearch = !searchText || rowConcatenated.includes(lowerSearch);
 
-    // Filtro de status
-    // Para cada row, verifica se há ao menos um mês que tenha o status selecionado
-    const rowHasStatus = item.months.some((m) => {
-      const statusDoMes = getStatusBySugestao(m.sugestao);
-      return statusFilter === "All" || statusDoMes === statusFilter;
+    // Filtro de status (agora com base em monthData.status)
+    // Verifica se ao menos um mês tem status = statusFilter
+    const rowHasStatus = item.months.some((m: any) => {
+      // Se o statusFilter for "All", não filtramos. Caso contrário, comparamos
+      return statusFilter === "All" || m.status === statusFilter;
     });
 
-    return (
-      matchesVendor &&
-      matchesCat &&
-      matchesOrig &&
-      matchesSS &&
-      matchesSearch &&
-      rowHasStatus
-    );
+    return matchesVendor && matchesCat && matchesOrig && matchesSS && matchesSearch && rowHasStatus;
   });
 
   // -------------------------------------------------------
-  // FUNÇÕES DE ATUALIZAÇÃO DOS INPUTS (onChange)
+  // recalculateSugestao
   // -------------------------------------------------------
+  // Agora, além de recalcular 'sugestao', 'dio', etc., recalculamos 'status'
   const recalculateSugestao = (data: any) => {
     return data.map((row: any) => {
       let updatedMonths = row.months.map((m: any) => {
-        let dio = Math.round((row.onHand + m.back + m.sugestao - row.giroMes) / row.dioIdeal * 30);
+        // 1) Calcula dio
+        let dio = Math.round(
+          (row.onHand + m.back + m.sugestao - row.giroMes) / row.dioIdeal * 30
+        );
+
+        // 2) Calcula dioDec
         let dioDec = dio;
         if (m.decisao > 0) {
-          dioDec = Math.round((row.onHand + m.back + m.decisao - m.giro) / row.giroMes * 30);
+          dioDec = Math.round(
+            (row.onHand + m.back + m.decisao - m.giro) / row.giroMes * 30
+          );
         }
+
+        // 3) Recalcula sugestao
+        const newSugestao = Math.round(
+          (row.onHand + m.back - m.giro) / row.giroMes * 30
+        );
+
+        // 4) Recalcula status chamando getNewStatus
+        const newStatus = getNewStatus({
+          onHand: m.onHandMonth,
+          back: m.back,
+          giro: m.giro,
+          dio,
+          leadTime: row.leadTime,
+        });
+
         return {
           ...m,
-          sugestao: Math.round((row.onHand + m.back - m.giro) / row.giroMes * 30),
+          sugestao: newSugestao,
           dio,
           dioDec,
+          status: newStatus,
         };
       });
 
-      // Propagar a "decisao" de forma acumulativa
+      // 5) Propagar "decisao" de forma acumulativa (se for parte da sua lógica)
       let decisaoAcumulada = 0;
       for (let i = 0; i < updatedMonths.length; i++) {
         updatedMonths[i].sugestao -= decisaoAcumulada;
@@ -314,11 +388,12 @@ function DashboardPage() {
     });
   };
 
-  // Para atualizar o leadTime, giro e decisao, precisamos do índice real no `tableData`.
-  // Ex: "item" => buscar rowIndex real no array principal
+  // -------------------------------------------------------
+  // Handlers de leadTime, decisao, giro
+  // -------------------------------------------------------
   const handleLeadTimeChange = (realIndex: number, newLeadTime: number) => {
     setTableData((prev) => {
-      const updatedData = [...prev];
+      let updatedData = [...prev];
       updatedData[realIndex].leadTime = newLeadTime;
       return recalculateSugestao(updatedData);
     });
@@ -326,7 +401,7 @@ function DashboardPage() {
 
   const handleDecisaoChange = (realIndex: number, monthIndex: number, newDecisao: number) => {
     setTableData((prev) => {
-      const updatedData = [...prev];
+      let updatedData = [...prev];
       updatedData[realIndex].months[monthIndex].decisao = newDecisao;
       return recalculateSugestao(updatedData);
     });
@@ -334,26 +409,24 @@ function DashboardPage() {
 
   const handleGiroChange = (realIndex: number, monthIndex: number, newGiro: number) => {
     setTableData((prev) => {
-      const updatedData = [...prev];
+      let updatedData = [...prev];
       updatedData[realIndex].months[monthIndex].giro = newGiro;
       return recalculateSugestao(updatedData);
     });
   };
 
   // -------------------------------------------------------
-  // CHAT (MOCK)
+  // MOCK do CHAT
   // -------------------------------------------------------
   const chatHistoryMock = ["Relatório de quebra Janeiro", "Relatório saída primeiro semestre"];
-  const [messages, setMessages] = useState([{ id: 1, sender: "iazzie", text: "Olá, como posso ajudar?" }]);
+  const [messages, setMessages] = useState([
+    { id: 1, sender: "iazzie", text: "Olá, como posso ajudar?" },
+  ]);
   const [inputValue, setInputValue] = useState("");
 
   const handleSend = () => {
     if (!inputValue.trim()) return;
-    const userMessage = {
-      id: Date.now(),
-      sender: "user",
-      text: inputValue.trim(),
-    };
+    const userMessage = { id: Date.now(), sender: "user", text: inputValue.trim() };
     setInputValue("");
     setMessages((prev) => [...prev, userMessage]);
     setTimeout(() => {
@@ -361,11 +434,12 @@ function DashboardPage() {
     }, 400);
   };
 
+  // -------------------------------------------------------
+  // Render
+  // -------------------------------------------------------
   return (
     <>
       {/* FILTROS */}
-
-      {/* Busca (Input) */}
       <div className="flex flex-col w-80">
         <span className="text-sm font-semibold text-[#EF7925]">Busca</span>
         <Input
@@ -377,9 +451,7 @@ function DashboardPage() {
       </div>
 
       <div className="flex flex-wrap gap-4 mt-5">
-        
-
-        {/* Vendor (Select antd) */}
+        {/* Vendor */}
         <div className="flex flex-col">
           <span className="text-sm font-semibold text-[#EF7925]">Vendor</span>
           <Select
@@ -398,7 +470,7 @@ function DashboardPage() {
           </Select>
         </div>
 
-        {/* Categoria (Select antd) */}
+        {/* Categoria */}
         <div className="flex flex-col">
           <span className="text-sm font-semibold text-[#EF7925]">Categoria</span>
           <Select
@@ -417,7 +489,7 @@ function DashboardPage() {
           </Select>
         </div>
 
-        {/* PARTN ORIG (Select antd) */}
+        {/* PARTN ORIG */}
         <div className="flex flex-col">
           <span className="text-sm font-semibold text-[#EF7925]">PARTN ORIG</span>
           <Select
@@ -436,7 +508,7 @@ function DashboardPage() {
           </Select>
         </div>
 
-        {/* PARTN SS (Select antd) */}
+        {/* PARTN SS */}
         <div className="flex flex-col">
           <span className="text-sm font-semibold text-[#EF7925]">PARTN SS</span>
           <Select
@@ -455,7 +527,7 @@ function DashboardPage() {
           </Select>
         </div>
 
-        {/* Status (Select antd) */}
+        {/* Status */}
         <div className="flex flex-col">
           <span className="text-sm font-semibold text-[#EF7925]">Status</span>
           <Select
@@ -466,27 +538,24 @@ function DashboardPage() {
             size="small"
           >
             <Option value="All">All</Option>
-            <Option value="Grande compra necessária">Grande compra necessária</Option>
-            <Option value="Compra de médio porte">Compra de médio porte</Option>
-            <Option value="Pequena compra necessária">Pequena compra necessária</Option>
-            <Option value="Sem necessidade de compra">Sem necessidade de compra</Option>
-            <Option value="Reduzir estoque atual">Reduzir estoque atual</Option>
+            <Option value="COMPRA IMEDIATA">COMPRA IMEDIATA</Option>
+            <Option value="ESTOQUE OK">ESTOQUE OK</Option>
+            <Option value="ALERTA AGING">ALERTA AGING</Option>
+            <Option value="RUPTURA DE ESTOQUE">RUPTURA DE ESTOQUE</Option>
+            <Option value="RUPTURA DE ESTOQUE">POSTERGAR BACKLOGE</Option>
+            <Option value="RUPTURA DE ESTOQUE">ANTECIPAR BACKLOGE</Option>
+            <Option value="RUPTURA DE ESTOQUE">BAIXO GIRO</Option>
           </Select>
         </div>
 
         {/* Slider p/ quantidade de meses */}
         <div className="flex flex-col w-40">
           <span className="text-sm font-semibold text-[#EF7925]">Meses</span>
-          <Slider
-            min={1}
-            max={12}
-            defaultValue={6}
-            onChange={(value) => setNumMonthsToShow(value)}
-          />
+          <Slider min={1} max={12} defaultValue={6} onChange={(value) => setNumMonthsToShow(value)} />
         </div>
       </div>
 
-      {/* PRIMEIRA TABELA */}
+      {/* TABELA */}
       <Card className="mt-5 p-3 shadow-sm">
         <CardContent className="overflow-x-auto">
           <Table>
@@ -504,17 +573,16 @@ function DashboardPage() {
                   <TableHead className="py-0 w-16">DIO Ideal</TableHead>
                   <TableHead className="py-0 w-16">Lead Time</TableHead>
                 </TableHead>
-                <TableHead className="w-32 text-left">
+                <TableHead className=" p-0  text-left">
                   <span className="text-sm font-semibold text-[#EF7925]">Entradas</span>
-                  {/* Limitando a exibição dos meses */}
                   {months.slice(0, numMonthsToShow).map((month) => (
-                    <TableHead key={month} className="px-0 w-32 pr-10 text-left">
-                       <span className="text-base font-semibold">{month}</span>
+                    <TableHead key={month} className="px-0 pl-0 w-32 pr-10 text-left">
+                      <span className="text-base font-semibold">{month}</span>
                       <div className="flex">
                         <TableHead className="p-0 w-16">OnHand</TableHead>
                         <TableHead className="p-0 w-14 text-xs">Back</TableHead>
                         <TableHead className="p-0 w-24">Giro Mês</TableHead>
-                        <TableHead className="py-0 w-32 text-xs">Status</TableHead>
+                        <TableHead className="py-0 w-24 text-xs">Status</TableHead>
                         <TableHead className="py-0 w-20 text-xs">Sugestão</TableHead>
                         <TableHead className="py-0 w-12 text-xs">DIO SUG</TableHead>
                         <TableHead className="py-0 w-16 text-xs">Decisão</TableHead>
@@ -526,9 +594,9 @@ function DashboardPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredData.map((row) => {
+              {filteredData.map((row: any) => {
                 // Encontrar o índice real no array tableData
-                const realIndex = tableData.findIndex((r) => r.id === row.id);
+                const realIndex = tableData.findIndex((r: any) => r.id === row.id);
                 if (realIndex < 0) return null;
 
                 return (
@@ -537,7 +605,7 @@ function DashboardPage() {
                     <TableCell className="py-1 text-[10px]">{row.partnOrig}</TableCell>
                     <TableCell className="py-1 text-[10px]">{row.partnSS}</TableCell>
                     <TableCell className="py-1 text-[10px]">{row.category}</TableCell>
-                    <TableCell className="pr-10">
+                    <TableCell className="">
                       <div className="flex gap-7 pl-8 flex-row">
                         <span className="py-1 text-xs">{row.onHand}</span>
                         <span className="py-1 pl-4 text-xs">{row.giroMes}</span>
@@ -556,13 +624,11 @@ function DashboardPage() {
                       </div>
                     </TableCell>
 
-                    <div className="flex pl-7 flex-row">
-                      {row.months.slice(0, numMonthsToShow).map((monthData, monthIndex) => (
+                    <div className="flex flex-row">
+                      {row.months.slice(0, numMonthsToShow).map((monthData: any, monthIndex: number) => (
                         <TableCell key={monthIndex} className="p-0 w-full py-2 text-xs">
                           <div className="flex gap-3 w-full flex-row">
-                            <span className="py-0 p-0 w-12 text-xs">
-                              {monthData.onHandMonth}
-                            </span>
+                            <span className="py-0 p-0 w-12 text-xs">{monthData.onHandMonth}</span>
                             <span className="py-0 w-8 text-xs">{monthData.back}</span>
                             <Input
                               type="number"
@@ -572,8 +638,9 @@ function DashboardPage() {
                                 handleGiroChange(realIndex, monthIndex, Number(e.target.value))
                               }
                             />
-                            <span className="py-0 pl-5 w-40 text-[10px]">
-                              {getStatusBySugestao(monthData.sugestao)}
+                            {/* Agora o status vem diretamente de monthData.status */}
+                            <span className="py-0 pl-5 w-32 text-[10px]">
+                              {monthData.status}
                             </span>
                             <span className="py-0 w-14 text-xs">{monthData.sugestao}</span>
                             <span className="py-0 w-8 text-xs">{monthData.dio}</span>
@@ -614,7 +681,6 @@ function DashboardPage() {
       {/* CHAT */}
       <Card className="mt-5 shadow-sm">
         <CardContent className="p-4 flex h-[400px]">
-          {/* Lateral Esquerda */}
           <div className="w-[260px] border-r border-gray-200 pr-4 flex flex-col">
             <button className="text-sm font-semibold text-[#2D2D2D] hover:bg-[#F5F7FA] text-left p-1">
               + Nova Conversa
@@ -632,8 +698,6 @@ function DashboardPage() {
               ))}
             </div>
           </div>
-
-          {/* Área Principal do Chat */}
           <div className="flex-1 flex flex-col">
             <div className="flex-1 p-2 space-y-2 overflow-auto">
               {messages.map((msg) => {
