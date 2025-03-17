@@ -2,7 +2,7 @@
 
 import React, { useContext, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import {  Input } from 'antd';
+import { Input, Slider } from 'antd';
 // ShadCN/UI
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -30,28 +30,56 @@ const WeeklyActivityChartNoSSR = dynamic(
   { ssr: false }
 );
 
+/**
+ * Função utilitária para converter o valor de sugestão (sugestao)
+ * em um status textual de acordo com a lógica especificada.
+ */
+function getStatusBySugestao(sugestao: number): string {
+  if (sugestao > 1000) {
+    return "Grande compra necessária";
+  } else if (sugestao >= 100 && sugestao <= 1000) {
+    return "Compra de médio porte";
+  } else if (sugestao >= 1 && sugestao < 100) {
+    return "Pequena compra necessária";
+  } else if (sugestao === 0) {
+    return "Sem necessidade de compra";
+  } else {
+    return "Reduzir estoque atual";
+  }
+}
+
 function DashboardPage() {
   const theme = useContext(ThemeContext);
 
   // -------------------------------------------------------
-  // MOCK DE DADOS
+  // Mock de dados (iniciais)
   // -------------------------------------------------------
   const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
-  // Mock de dados inicial
-  const calculateInitialSugestao = (onHand: number, giroMes: number, leadTime: number, back: number): number => {
-    return (giroMes / 30) * leadTime - onHand - back;
-  };
-  
-  const calculateInitialDio = (onHand: number, giroMes: number, decisao: number, back: number): number => {
-    return onHand - giroMes + decisao + back;
-  };
-  
-  const calculateInitialDioDec = (dio: number, giroMes: number): number => {
-    return dio / 30 / giroMes;
+  // Funções auxiliares para cálculo inicial
+  const calculateInitialSugestao = (
+    onHand: number,
+    giroMes: number,
+    leadTime: number,
+    back: number
+  ): number => {
+    return Math.round((onHand + back - giroMes) / giroMes * 30);
   };
 
-  // Mock de dados inicial com sugestão já calculada
+  const calculateInitialDio = (
+    onHand: number,
+    giroMes: number,
+    sugestao: number,
+    back: number,
+    dioIdeal: number
+  ): number => {
+    return Math.round((onHand + back + sugestao - giroMes) / dioIdeal * 30);
+  };
+
+  const calculateInitialDioDec = (dio: number, giroMes: number): number => {
+    return Math.round(dio);
+  };
+
   const [tableData, setTableData] = useState([
     {
       vendor: "ZEBRA",
@@ -66,10 +94,15 @@ function DashboardPage() {
       months: months.map((month, index) => ({
         month,
         back: 0,
-        sugestao: calculateInitialSugestao(228, 117, 60, 0), 
+        onHandMonth: 228 - 117,
+        sugestao: calculateInitialSugestao(228, 117, 60, 0),
         decisao: 0,
-        dio: calculateInitialDio(228, 117, 0, 0),
-        dioDec: calculateInitialDioDec(calculateInitialDio(228, 117, 0, 0), 117)
+        giro: 117,
+        dio: calculateInitialDio(228, 117, calculateInitialSugestao(228, 117, 60, 0), 0, 90),
+        dioDec: calculateInitialDioDec(
+          calculateInitialDio(228, 117, calculateInitialSugestao(228, 117, 60, 0), 0, 90),
+          117
+        ),
       })),
     },
     {
@@ -85,10 +118,15 @@ function DashboardPage() {
       months: months.map((month, index) => ({
         month,
         back: 0,
+        onHandMonth: 534 - 93,
         sugestao: calculateInitialSugestao(534, 93, 60, 0),
         decisao: 0,
-        dio: calculateInitialDio(534, 93, 0, 0),
-        dioDec: calculateInitialDioDec(calculateInitialDio(534, 93, 0, 0), 93)
+        giro: 93,
+        dio: calculateInitialDio(534, 93, calculateInitialSugestao(228, 117, 60, 0), 0, 90),
+        dioDec: calculateInitialDioDec(
+          calculateInitialDio(534, 93, calculateInitialSugestao(228, 117, 60, 0), 0, 90),
+          93
+        ),
       })),
     },
     {
@@ -104,10 +142,15 @@ function DashboardPage() {
       months: months.map((month, index) => ({
         month,
         back: 0,
+        onHandMonth: 95 - 88,
         sugestao: calculateInitialSugestao(95, 88, 60, 0),
         decisao: 0,
-        dio: calculateInitialDio(95, 88, 0, 0),
-        dioDec: calculateInitialDioDec(calculateInitialDio(95, 88, 0, 0), 88)
+        giro: 88,
+        dio: calculateInitialDio(95, 88, calculateInitialSugestao(95, 88, 60, 0), 0, 90),
+        dioDec: calculateInitialDioDec(
+          calculateInitialDio(95, 88, calculateInitialSugestao(95, 88, 60, 0), 0, 90),
+          88
+        ),
       })),
     },
     {
@@ -123,10 +166,15 @@ function DashboardPage() {
       months: months.map((month, index) => ({
         month,
         back: 0,
+        onHandMonth: 187 - 14,
         sugestao: calculateInitialSugestao(187, 14, 60, 0),
         decisao: 0,
-        dio: calculateInitialDio(187, 14, 0, 0),
-        dioDec: calculateInitialDioDec(calculateInitialDio(187, 14, 0, 0), 14)
+        giro: 14,
+        dio: calculateInitialDio(187, 14, calculateInitialSugestao(187, 14, 60, 0), 0, 90),
+        dioDec: calculateInitialDioDec(
+          calculateInitialDio(187, 14, calculateInitialSugestao(187, 14, 60, 0), 0, 90),
+          14
+        ),
       })),
     },
     {
@@ -142,15 +190,18 @@ function DashboardPage() {
       months: months.map((month, index) => ({
         month,
         back: 0,
+        onHandMonth: 212 - 88,
         sugestao: calculateInitialSugestao(212, 88, 45, 0),
         decisao: 0,
-        dio: calculateInitialDio(212, 88, 0, 0),
-        dioDec: calculateInitialDioDec(calculateInitialDio(212, 88, 0, 0), 88)
+        giro: 88,
+        dio: calculateInitialDio(212, 88, calculateInitialSugestao(212, 88, 45, 0), 0, 75),
+        dioDec: calculateInitialDioDec(
+          calculateInitialDio(212, 88, calculateInitialSugestao(212, 88, 45, 0), 0, 75),
+          88
+        ),
       })),
-    } 
+    },
   ]);
-  
-
 
   // -------------------------------------------------------
   // ESTADOS PARA FILTROS
@@ -159,6 +210,15 @@ function DashboardPage() {
   const [category, setCategory] = useState("All");
   const [partnOrig, setPartnOrig] = useState("All");
   const [partnSS, setPartnSS] = useState("All");
+
+  // Filtro de texto
+  const [searchText, setSearchText] = useState("");
+
+  // Filtro de status
+  const [statusFilter, setStatusFilter] = useState("All");
+
+  // Quantidade de meses a serem mostrados
+  const [numMonthsToShow, setNumMonthsToShow] = useState(6);
 
   // -------------------------------------------------------
   // LISTAS DE OPÇÕES ÚNICAS
@@ -183,69 +243,106 @@ function DashboardPage() {
     return Array.from(setS);
   }, [tableData]);
 
-
   // -------------------------------------------------------
   // APLICAÇÃO DE FILTROS
   // -------------------------------------------------------
   const filteredData = tableData.filter((item) => {
+    // Filtros simples (Vendor, Categoria, PARTN ORIG, PARTN SS)
     const matchesVendor = vendor === "All" || item.vendor === vendor;
     const matchesCat = category === "All" || item.category === category;
     const matchesOrig = partnOrig === "All" || item.partnOrig === partnOrig;
     const matchesSS = partnSS === "All" || item.partnSS === partnSS;
-    return matchesVendor && matchesCat && matchesOrig && matchesSS;
+
+    // Filtro de busca textual
+    const lowerSearch = searchText.toLowerCase();
+    const rowConcatenated = [
+      item.vendor,
+      item.category,
+      item.partnOrig,
+      item.partnSS,
+    ].join(" ").toLowerCase();
+    const matchesSearch = !searchText || rowConcatenated.includes(lowerSearch);
+
+    // Filtro de status
+    // Se statusFilter === "All", não filtra por status. Se não, verifica se
+    // pelo menos um dos meses corresponde ao status selecionado.
+    const rowHasStatus = item.months.some((m: any) => {
+      const statusDoMes = getStatusBySugestao(m.sugestao);
+      return statusDoMes === statusFilter;
+    });
+    const matchesStatus = statusFilter === "All" || rowHasStatus;
+
+    return (
+      matchesVendor &&
+      matchesCat &&
+      matchesOrig &&
+      matchesSS &&
+      matchesSearch &&
+      matchesStatus
+    );
   });
 
   // -------------------------------------------------------
-  // MANIPULADORES
+  // MANIPULADORES DE ESTADO/CÁLCULO
   // -------------------------------------------------------
-  // Ao editar LeadTime: recalcula "sugestao = baseSugestao + leadTime"
-
-  const recalculateSugestao = (data:any) => {
-    return data.map((row:any) => {
-        let updatedMonths = row.months.map((m:any, index:any) => {
-            let dio = row.onHand - row.giroMes + m.back + m.decisao;
-            let dioDec = dio / (row.giroMes / 30);
-
-            return {
-                ...m,
-                sugestao: (row.giroMes / 30) * row.leadTime - row.onHand - m.back,
-                dio,
-                dioDec
-            };
-        });
-
-        // Propagação da decisão de forma acumulativa em todos os meses subsequentes
-        let decisaoAcumulada = 0;
-        for (let i = 0; i < updatedMonths.length; i++) {
-            updatedMonths[i].sugestao -= decisaoAcumulada;
-            decisaoAcumulada += updatedMonths[i].decisao;
+  const recalculateSugestao = (data: any) => {
+    return data.map((row: any) => {
+      let updatedMonths = row.months.map((m: any) => {
+        let dio = Math.round((row.onHand + m.back + m.sugestao - row.giroMes) / row.dioIdeal * 30);
+        let dioDec = dio;
+        if (m.decisao > 0) {
+          dioDec = Math.round((row.onHand + m.back + m.decisao - m.giro) / row.giroMes * 30);
         }
+        return {
+          ...m,
+          sugestao: Math.round((row.onHand + m.back - m.giro) / row.giroMes * 30),
+          dio,
+          dioDec,
+        };
+      });
 
-        return { ...row, months: updatedMonths };
+      // Propagação da decisão de forma acumulativa em todos os meses subsequentes
+      let decisaoAcumulada = 0;
+      for (let i = 0; i < updatedMonths.length; i++) {
+        updatedMonths[i].sugestao -= decisaoAcumulada;
+        decisaoAcumulada += updatedMonths[i].decisao;
+      }
+
+      return { ...row, months: updatedMonths };
     });
-};
+  };
 
-const handleLeadTimeChange = (rowIndex:any, newLeadTime:any) => {
+  const handleLeadTimeChange = (rowIndex: number, newLeadTime: number) => {
     setTableData((prev) => {
-        let updatedData = [...prev];
-        updatedData[rowIndex].leadTime = newLeadTime;
-        return recalculateSugestao(updatedData);
+      let updatedData = [...prev];
+      updatedData[rowIndex].leadTime = newLeadTime;
+      return recalculateSugestao(updatedData);
     });
-};
+  };
 
-const handleDecisaoChange = (rowIndex:any, monthIndex:any, newDecisao:any) => {
-  setTableData((prev) => {
+  const handleDecisaoChange = (rowIndex: number, monthIndex: number, newDecisao: number) => {
+    setTableData((prev) => {
       let updatedData = [...prev];
       updatedData[rowIndex].months[monthIndex].decisao = newDecisao;
       return recalculateSugestao(updatedData);
-  });
-};
+    });
+  };
+
+  const handleGiroChange = (rowIndex: number, monthIndex: number, newGiro: number) => {
+    setTableData((prev) => {
+      let updatedData = [...prev];
+      updatedData[rowIndex].months[monthIndex].giro = newGiro;
+      return recalculateSugestao(updatedData);
+    });
+  };
 
   // -------------------------------------------------------
   // CHAT (MOCK)
   // -------------------------------------------------------
   const chatHistoryMock = ["Relatório de quebra Janeiro", "Relatório saída primeiro semestre"];
-  const [messages, setMessages] = useState([{ id: 1, sender: "iazzie", text: "Olá, como posso ajudar?" }]);
+  const [messages, setMessages] = useState([
+    { id: 1, sender: "iazzie", text: "Olá, como posso ajudar?" },
+  ]);
   const [inputValue, setInputValue] = useState("");
 
   const handleSend = () => {
@@ -262,12 +359,22 @@ const handleDecisaoChange = (rowIndex:any, monthIndex:any, newDecisao:any) => {
     }, 400);
   };
 
-  
-
   return (
     <>
       {/* FILTROS */}
+       {/* Campo de Busca */}
+       <div className="flex flex-col w-96 ">
+          <span className="text-sm font-semibold text-[#EF7925]">Busca</span>
+          <Input
+            placeholder="Filtrar..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="h-8 text-xs"
+          />
+        </div>
       <div className="flex flex-wrap gap-4 mt-5">
+       
+
         {/* Vendor */}
         <div className="flex flex-col">
           <span className="text-sm font-semibold text-[#EF7925]">Vendor</span>
@@ -351,6 +458,41 @@ const handleDecisaoChange = (rowIndex:any, monthIndex:any, newDecisao:any) => {
             </SelectContent>
           </Select>
         </div>
+
+        {/* Status */}
+        <div className="flex flex-col">
+          <span className="text-sm font-semibold text-[#EF7925]">Status</span>
+          <Select onValueChange={setStatusFilter} value={statusFilter}>
+            <SelectTrigger className="w-[180px] h-8 text-xs">
+              <SelectValue placeholder="Filtrar Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Status</SelectLabel>
+                <SelectItem value="All">All</SelectItem>
+                <SelectItem value="Grande compra necessária">Grande compra necessária</SelectItem>
+                <SelectItem value="Compra de médio porte">Compra de médio porte</SelectItem>
+                <SelectItem value="Pequena compra necessária">Pequena compra necessária</SelectItem>
+                <SelectItem value="Sem necessidade de compra">Sem necessidade de compra</SelectItem>
+                <SelectItem value="Reduzir estoque atual">Reduzir estoque atual</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Slider para controlar quantos meses são exibidos */}
+        <div className="flex flex-col w-40">
+          <span className="text-sm font-semibold text-[#EF7925]">Meses</span>
+          <Slider
+            min={1}
+            max={12}
+            defaultValue={6}
+            onChange={(value) => setNumMonthsToShow(value)}
+            // Se quiser mostrar o valor dinamicamente, poderia usar:
+            // value={numMonthsToShow}
+            // marks={{ 1: '1', 6: '6', 12: '12' }}
+          />
+        </div>
       </div>
 
       {/* PRIMEIRA TABELA */}
@@ -359,12 +501,12 @@ const handleDecisaoChange = (rowIndex:any, monthIndex:any, newDecisao:any) => {
           <Table>
             <TableHeader>
               <TableRow className="h-5 text-xs">
-                  <TableHead className="py-0 w-24">Vendor</TableHead>
-                  <TableHead className="py-0 w-52">PARTN ORIG</TableHead>
-                  <TableHead className="py-0 w-52">PARTN SS</TableHead>
-                  <TableHead className="py-0 w-32">Categoria</TableHead>
+                <TableHead className="py-0 w-24">Vendor</TableHead>
+                <TableHead className="py-0 w-52">PARTN ORIG</TableHead>
+                <TableHead className="py-0 w-52">PARTN SS</TableHead>
+                <TableHead className="py-0 w-32">Categoria</TableHead>
                 <TableHead className="w-32 pl-10 pb-5 text-left">
-                <span className="text-sm font-semibold text-[#EF7925]">Atual</span>
+                  <span className="text-sm font-semibold text-[#EF7925]">Atual</span>
                   <TableHead className="p-0 w-10">OnHand</TableHead>
                   <TableHead className="py-0 pl-6 w-16">Giro Mês</TableHead>
                   <TableHead className="py-0 w-16">DIO Atual</TableHead>
@@ -372,19 +514,24 @@ const handleDecisaoChange = (rowIndex:any, monthIndex:any, newDecisao:any) => {
                   <TableHead className="py-0 w-16">Lead Time</TableHead>
                 </TableHead>
                 <TableHead className="w-32 text-left">
-                <span className="text-sm font-semibold text-[#EF7925]">Entradas</span>
-                {months.map((month) => (
-                  <TableHead key={month} className="px-0 w-32 pr-10 text-left">
-                    {month}
-                    <div className="flex">
-                      <TableHead className="p-0 w-10 text-xs">Back</TableHead>
-                      <TableHead className="py-0 w-20 text-xs">Sugestão</TableHead>
-                      <TableHead className="py-0 w-32 text-xs">Justificativa</TableHead>
-                      <TableHead className="py-0 w-16 text-xs">Decisão</TableHead>
-                    </div>
-                  </TableHead>
-                ))}
-                 </TableHead>
+                  <span className="text-sm font-semibold text-[#EF7925]">Entradas</span>
+                  {/* Aqui limitamos a exibição dos cabeçalhos dos meses pelo slice */}
+                  {months.slice(0, numMonthsToShow).map((month) => (
+                    <TableHead key={month} className="px-0 w-32 pr-10 text-left">
+                      {month}
+                      <div className="flex">
+                        <TableHead className="p-0 w-16">OnHand</TableHead>
+                        <TableHead className="p-0 w-14 text-xs">Back</TableHead>
+                        <TableHead className="p-0 w-24">Giro Mês</TableHead>
+                        <TableHead className="py-0 w-32 text-xs">Status</TableHead>
+                        <TableHead className="py-0 w-20 text-xs">Sugestão</TableHead>
+                        <TableHead className="py-0 w-12 text-xs">DIO SUG</TableHead>
+                        <TableHead className="py-0 w-16 text-xs">Decisão</TableHead>
+                        <TableHead className="py-0 pl-7 w-24 text-xs">DIO DEC</TableHead>
+                      </div>
+                    </TableHead>
+                  ))}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -397,10 +544,10 @@ const handleDecisaoChange = (rowIndex:any, monthIndex:any, newDecisao:any) => {
                   <TableCell className="pr-10">
                     <div className="flex gap-7 pl-8 flex-row">
                       <span className="py-1 text-xs">{row.onHand}</span>
-                      <span className="py-1 pl-2 text-xs">{row.giroMes}</span>
+                      <span className="py-1 pl-4 text-xs">{row.giroMes}</span>
                       <span className="py-1 pl-2 text-xs">{row.dioAtual}</span>
-                      <span className="py-1 pl-5  text-xs">{row.dioIdeal}</span>
-                      <div className="pl-3 " >
+                      <span className="py-1 pl-5 text-xs">{row.dioIdeal}</span>
+                      <div className="pl-3">
                         <Input
                           type="number"
                           className="w-16 text-center text-xs"
@@ -408,88 +555,43 @@ const handleDecisaoChange = (rowIndex:any, monthIndex:any, newDecisao:any) => {
                           onChange={(e) => handleLeadTimeChange(rowIndex, Number(e.target.value))}
                         />
                       </div>
-                    </div>  
+                    </div>
                   </TableCell>
+
+                  {/* Meses (limitados pelo slice de numMonthsToShow) */}
                   <div className="flex pl-7 flex-row">
-                  {months.map((_, monthIndex) => {
-                    const monthData = row.months[monthIndex];
-                    if (!monthData) return <TableCell key={monthIndex} />;
-                    return (
-                      <TableCell key={monthIndex} className="p-0  py-2 text-xs">
-                        <div className="flex gap-3 w-[352px] flex-row ">
-                          <span className="py-0 p-0 w-10 text-xs">{monthData.back}</span>
-                          <span className="py-0 w-14 text-xs">{monthData.sugestao}</span>
-                          <span className="py-0 w-28 text-[10px]">
-                            {(() => {
-                              if (monthData.sugestao > 1000) {
-                                return 'Grande compra necessária';
-                              } else if (monthData.sugestao >= 100 && monthData.sugestao <= 1000) {
-                                return 'Compra de médio porte';
-                              } else if (monthData.sugestao >= 1 && monthData.sugestao < 100) {
-                                return 'Pequena compra necessária';
-                              } else if (monthData.sugestao === 0) {
-                                return 'Sem necessidade de compra';
-                              } else {
-                                return 'Reduzir estoque atual';
-                              }
-                            })()}
+                    {row.months.slice(0, numMonthsToShow).map((monthData: any, monthIndex: number) => (
+                      <TableCell key={monthIndex} className="p-0 w-full py-2 text-xs">
+                        <div className="flex gap-3 w-full flex-row ">
+                          <span className="py-0 p-0 w-12 text-xs">{monthData.onHandMonth}</span>
+                          <span className="py-0 w-8 text-xs">{monthData.back}</span>
+                          <Input
+                            type="number"
+                            className="w-20 text-center text-xs"
+                            value={monthData.giro}
+                            onChange={(e) => handleGiroChange(rowIndex, monthIndex, Number(e.target.value))}
+                          />
+                          {/* Status */}
+                          <span className="py-0 pl-5 w-40 text-[10px]">
+                            {getStatusBySugestao(monthData.sugestao)}
                           </span>
+                          <span className="py-0 w-14 text-xs">{monthData.sugestao}</span>
+                          <span className="py-0 w-8 text-xs">{monthData.dio}</span>
                           <Input
                             type="number"
                             className="w-16 text-center text-xs"
                             value={monthData.decisao}
                             onChange={(e) => handleDecisaoChange(rowIndex, monthIndex, Number(e.target.value))}
                           />
-                          </div>
+                          <span className="py-0 pl-3 w-20 text-xs">{monthData.dioDec}</span>
+                        </div>
                       </TableCell>
-                    );
-                  })}
+                    ))}
                   </div>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
-      <div className="mt-10">    
-        <span className="text-base font-semibold text-[#EF7925]">On Hand Preditivo</span>
-      </div> 
-
-      {/* SEGUNDA TABELA */}
-      <Card className="mt-5 p-3 shadow-sm">
-        <CardContent className="flex">
-          <div className="flex-1 overflow-x-auto">
-            <Table className="border-b">
-              <TableHeader className="bg-gray-50">
-                <TableRow className="text-xs">
-                  {months.map((month) => (
-                    <TableHead key={month} className="">
-                      <TableRow className="flex justify-center font-semibold">{month}</TableRow>
-                      <TableHead className="w-32">DIO</TableHead>
-                      <TableHead className="w-32">DIO DEC</TableHead>
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredData.map((row, rowIndex) => (
-                  <TableRow key={rowIndex}>
-                    {months.map((_, monthIndex) => {
-                      const monthData = row.months[monthIndex];
-                      if (!monthData) return <TableCell key={monthIndex} />;
-
-                      return (
-                        <TableCell key={monthIndex} className="text-xs py-0">
-                          <TableCell className="w-32">{monthData.dio}</TableCell>
-                          <TableCell className="w-32">{monthData.dioDec.toFixed(0)}</TableCell>
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
         </CardContent>
       </Card>
 
@@ -504,11 +606,7 @@ const handleDecisaoChange = (rowIndex:any, monthIndex:any, newDecisao:any) => {
       </div>
 
       {/* Avatar */}
-      <img 
-        src="/iazzie.png" 
-        alt="IAzzie Logo" 
-        className="ml-2 mt-7 h-8 w-auto" 
-      />
+      <img src="/iazzie.png" alt="IAzzie Logo" className="ml-2 mt-7 h-8 w-auto" />
 
       {/* CHAT */}
       <Card className="mt-5 shadow-sm">
