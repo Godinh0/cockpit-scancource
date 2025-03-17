@@ -2,10 +2,17 @@
 
 import React, { useContext, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { Input, Slider } from 'antd';
+import { Input, Slider } from "antd";
 // ShadCN/UI
 import { Card, CardContent } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Select,
   SelectContent,
@@ -30,10 +37,7 @@ const WeeklyActivityChartNoSSR = dynamic(
   { ssr: false }
 );
 
-/**
- * Função utilitária para converter o valor de sugestão (sugestao)
- * em um status textual de acordo com a lógica especificada.
- */
+// Função utilitária para retornar o Status pela sugestão
 function getStatusBySugestao(sugestao: number): string {
   if (sugestao > 1000) {
     return "Grande compra necessária";
@@ -52,18 +56,30 @@ function DashboardPage() {
   const theme = useContext(ThemeContext);
 
   // -------------------------------------------------------
-  // Mock de dados (iniciais)
+  // Mock de dados com "id" único para cada registro
   // -------------------------------------------------------
-  const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+  const months = [
+    "Jan",
+    "Fev",
+    "Mar",
+    "Abr",
+    "Mai",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Set",
+    "Out",
+    "Nov",
+    "Dez",
+  ];
 
-  // Funções auxiliares para cálculo inicial
   const calculateInitialSugestao = (
     onHand: number,
     giroMes: number,
     leadTime: number,
     back: number
   ): number => {
-    return Math.round((onHand + back - giroMes) / giroMes * 30);
+    return Math.round(((onHand + back - giroMes) / giroMes) * 30);
   };
 
   const calculateInitialDio = (
@@ -73,15 +89,17 @@ function DashboardPage() {
     back: number,
     dioIdeal: number
   ): number => {
-    return Math.round((onHand + back + sugestao - giroMes) / dioIdeal * 30);
+    return Math.round(((onHand + back + sugestao - giroMes) / dioIdeal) * 30);
   };
 
   const calculateInitialDioDec = (dio: number, giroMes: number): number => {
     return Math.round(dio);
   };
 
+  // Agora cada objeto tem um "id" único
   const [tableData, setTableData] = useState([
     {
+      id: "row-1", // <--- ID único
       vendor: "ZEBRA",
       partnOrig: "MC220J-2A3S2RW BR",
       partnSS: "MC220J-2A3S2RW BR_SC",
@@ -91,21 +109,24 @@ function DashboardPage() {
       dioAtual: 58,
       dioIdeal: 90,
       leadTime: 60,
-      months: months.map((month, index) => ({
-        month,
-        back: 0,
-        onHandMonth: 228 - 117,
-        sugestao: calculateInitialSugestao(228, 117, 60, 0),
-        decisao: 0,
-        giro: 117,
-        dio: calculateInitialDio(228, 117, calculateInitialSugestao(228, 117, 60, 0), 0, 90),
-        dioDec: calculateInitialDioDec(
-          calculateInitialDio(228, 117, calculateInitialSugestao(228, 117, 60, 0), 0, 90),
-          117
-        ),
-      })),
+      months: months.map(() => {
+        const sugestao = calculateInitialSugestao(228, 117, 60, 0);
+        return {
+          back: 0,
+          onHandMonth: 228 - 117,
+          sugestao,
+          decisao: 0,
+          giro: 117,
+          dio: calculateInitialDio(228, 117, sugestao, 0, 90),
+          dioDec: calculateInitialDioDec(
+            calculateInitialDio(228, 117, sugestao, 0, 90),
+            117
+          ),
+        };
+      }),
     },
     {
+      id: "row-2", // <--- ID único
       vendor: "ZEBRA",
       partnOrig: "MC330L-GE4EG4RW BR",
       partnSS: "MC330L-GE4EG4RW BR_SC",
@@ -115,21 +136,24 @@ function DashboardPage() {
       dioAtual: 171,
       dioIdeal: 90,
       leadTime: 60,
-      months: months.map((month, index) => ({
-        month,
-        back: 0,
-        onHandMonth: 534 - 93,
-        sugestao: calculateInitialSugestao(534, 93, 60, 0),
-        decisao: 0,
-        giro: 93,
-        dio: calculateInitialDio(534, 93, calculateInitialSugestao(228, 117, 60, 0), 0, 90),
-        dioDec: calculateInitialDioDec(
-          calculateInitialDio(534, 93, calculateInitialSugestao(228, 117, 60, 0), 0, 90),
-          93
-        ),
-      })),
+      months: months.map(() => {
+        const sugestao = calculateInitialSugestao(534, 93, 60, 0);
+        return {
+          back: 0,
+          onHandMonth: 534 - 93,
+          sugestao,
+          decisao: 0,
+          giro: 93,
+          dio: calculateInitialDio(534, 93, sugestao, 0, 90),
+          dioDec: calculateInitialDioDec(
+            calculateInitialDio(534, 93, sugestao, 0, 90),
+            93
+          ),
+        };
+      }),
     },
     {
+      id: "row-3", // <--- ID único
       vendor: "ZEBRA",
       partnOrig: "MC330L-GJ4EG4RW BR",
       partnSS: "MC330L-GJ4EG4RW BR_SC",
@@ -139,21 +163,24 @@ function DashboardPage() {
       dioAtual: 33,
       dioIdeal: 90,
       leadTime: 60,
-      months: months.map((month, index) => ({
-        month,
-        back: 0,
-        onHandMonth: 95 - 88,
-        sugestao: calculateInitialSugestao(95, 88, 60, 0),
-        decisao: 0,
-        giro: 88,
-        dio: calculateInitialDio(95, 88, calculateInitialSugestao(95, 88, 60, 0), 0, 90),
-        dioDec: calculateInitialDioDec(
-          calculateInitialDio(95, 88, calculateInitialSugestao(95, 88, 60, 0), 0, 90),
-          88
-        ),
-      })),
+      months: months.map(() => {
+        const sugestao = calculateInitialSugestao(95, 88, 60, 0);
+        return {
+          back: 0,
+          onHandMonth: 95 - 88,
+          sugestao,
+          decisao: 0,
+          giro: 88,
+          dio: calculateInitialDio(95, 88, sugestao, 0, 90),
+          dioDec: calculateInitialDioDec(
+            calculateInitialDio(95, 88, sugestao, 0, 90),
+            88
+          ),
+        };
+      }),
     },
     {
+      id: "row-4", // <--- ID único
       vendor: "ZEBRA",
       partnOrig: "MC330X-GE4EG4RW BR",
       partnSS: "MC330X-GE4EG4RW BR_SC",
@@ -163,21 +190,24 @@ function DashboardPage() {
       dioAtual: 390,
       dioIdeal: 90,
       leadTime: 60,
-      months: months.map((month, index) => ({
-        month,
-        back: 0,
-        onHandMonth: 187 - 14,
-        sugestao: calculateInitialSugestao(187, 14, 60, 0),
-        decisao: 0,
-        giro: 14,
-        dio: calculateInitialDio(187, 14, calculateInitialSugestao(187, 14, 60, 0), 0, 90),
-        dioDec: calculateInitialDioDec(
-          calculateInitialDio(187, 14, calculateInitialSugestao(187, 14, 60, 0), 0, 90),
-          14
-        ),
-      })),
+      months: months.map(() => {
+        const sugestao = calculateInitialSugestao(187, 14, 60, 0);
+        return {
+          back: 0,
+          onHandMonth: 187 - 14,
+          sugestao,
+          decisao: 0,
+          giro: 14,
+          dio: calculateInitialDio(187, 14, sugestao, 0, 90),
+          dioDec: calculateInitialDioDec(
+            calculateInitialDio(187, 14, sugestao, 0, 90),
+            14
+          ),
+        };
+      }),
     },
     {
+      id: "row-5", // <--- ID único
       vendor: "ZEBRA",
       partnOrig: "MC930B-GSEDG4RW",
       partnSS: "MC930B-GSEDG4RW_SC",
@@ -187,41 +217,41 @@ function DashboardPage() {
       dioAtual: 73,
       dioIdeal: 75,
       leadTime: 45,
-      months: months.map((month, index) => ({
-        month,
-        back: 0,
-        onHandMonth: 212 - 88,
-        sugestao: calculateInitialSugestao(212, 88, 45, 0),
-        decisao: 0,
-        giro: 88,
-        dio: calculateInitialDio(212, 88, calculateInitialSugestao(212, 88, 45, 0), 0, 75),
-        dioDec: calculateInitialDioDec(
-          calculateInitialDio(212, 88, calculateInitialSugestao(212, 88, 45, 0), 0, 75),
-          88
-        ),
-      })),
+      months: months.map(() => {
+        const sugestao = calculateInitialSugestao(212, 88, 45, 0);
+        return {
+          back: 0,
+          onHandMonth: 212 - 88,
+          sugestao,
+          decisao: 0,
+          giro: 88,
+          dio: calculateInitialDio(212, 88, sugestao, 0, 75),
+          dioDec: calculateInitialDioDec(
+            calculateInitialDio(212, 88, sugestao, 0, 75),
+            88
+          ),
+        };
+      }),
     },
   ]);
 
   // -------------------------------------------------------
-  // ESTADOS PARA FILTROS
+  // Estados dos Filtros
   // -------------------------------------------------------
   const [vendor, setVendor] = useState("All");
   const [category, setCategory] = useState("All");
   const [partnOrig, setPartnOrig] = useState("All");
   const [partnSS, setPartnSS] = useState("All");
+  const [statusFilter, setStatusFilter] = useState("All");
 
   // Filtro de texto
   const [searchText, setSearchText] = useState("");
 
-  // Filtro de status
-  const [statusFilter, setStatusFilter] = useState("All");
-
-  // Quantidade de meses a serem mostrados
+  // Slider: número de meses para exibir
   const [numMonthsToShow, setNumMonthsToShow] = useState(6);
 
   // -------------------------------------------------------
-  // LISTAS DE OPÇÕES ÚNICAS
+  // useMemo para listas de opções únicas
   // -------------------------------------------------------
   const uniqueVendors = useMemo(() => {
     const setV = new Set(tableData.map((d) => d.vendor));
@@ -244,55 +274,21 @@ function DashboardPage() {
   }, [tableData]);
 
   // -------------------------------------------------------
-  // APLICAÇÃO DE FILTROS
-  // -------------------------------------------------------
-  const filteredData = tableData.filter((item) => {
-    // Filtros simples (Vendor, Categoria, PARTN ORIG, PARTN SS)
-    const matchesVendor = vendor === "All" || item.vendor === vendor;
-    const matchesCat = category === "All" || item.category === category;
-    const matchesOrig = partnOrig === "All" || item.partnOrig === partnOrig;
-    const matchesSS = partnSS === "All" || item.partnSS === partnSS;
-
-    // Filtro de busca textual
-    const lowerSearch = searchText.toLowerCase();
-    const rowConcatenated = [
-      item.vendor,
-      item.category,
-      item.partnOrig,
-      item.partnSS,
-    ].join(" ").toLowerCase();
-    const matchesSearch = !searchText || rowConcatenated.includes(lowerSearch);
-
-    // Filtro de status
-    // Se statusFilter === "All", não filtra por status. Se não, verifica se
-    // pelo menos um dos meses corresponde ao status selecionado.
-    const rowHasStatus = item.months.some((m: any) => {
-      const statusDoMes = getStatusBySugestao(m.sugestao);
-      return statusDoMes === statusFilter;
-    });
-    const matchesStatus = statusFilter === "All" || rowHasStatus;
-
-    return (
-      matchesVendor &&
-      matchesCat &&
-      matchesOrig &&
-      matchesSS &&
-      matchesSearch &&
-      matchesStatus
-    );
-  });
-
-  // -------------------------------------------------------
-  // MANIPULADORES DE ESTADO/CÁLCULO
+  // Funções de Cálculo
   // -------------------------------------------------------
   const recalculateSugestao = (data: any) => {
     return data.map((row: any) => {
       let updatedMonths = row.months.map((m: any) => {
-        let dio = Math.round((row.onHand + m.back + m.sugestao - row.giroMes) / row.dioIdeal * 30);
+        let dio = Math.round(
+          (row.onHand + m.back + m.sugestao - row.giroMes) / row.dioIdeal * 30
+        );
         let dioDec = dio;
         if (m.decisao > 0) {
-          dioDec = Math.round((row.onHand + m.back + m.decisao - m.giro) / row.giroMes * 30);
+          dioDec = Math.round(
+            (row.onHand + m.back + m.decisao - m.giro) / row.giroMes * 30
+          );
         }
+
         return {
           ...m,
           sugestao: Math.round((row.onHand + m.back - m.giro) / row.giroMes * 30),
@@ -301,7 +297,7 @@ function DashboardPage() {
         };
       });
 
-      // Propagação da decisão de forma acumulativa em todos os meses subsequentes
+      // Propagação da decisão de forma acumulativa nos meses subsequentes
       let decisaoAcumulada = 0;
       for (let i = 0; i < updatedMonths.length; i++) {
         updatedMonths[i].sugestao -= decisaoAcumulada;
@@ -312,29 +308,60 @@ function DashboardPage() {
     });
   };
 
-  const handleLeadTimeChange = (rowIndex: number, newLeadTime: number) => {
+  // *** IMPORTANTE: agora recebemos "realIndex" ao invés de "rowIndex" direto.
+  const handleLeadTimeChange = (realIndex: number, newLeadTime: number) => {
     setTableData((prev) => {
       let updatedData = [...prev];
-      updatedData[rowIndex].leadTime = newLeadTime;
+      updatedData[realIndex].leadTime = newLeadTime;
       return recalculateSugestao(updatedData);
     });
   };
 
-  const handleDecisaoChange = (rowIndex: number, monthIndex: number, newDecisao: number) => {
+  const handleDecisaoChange = (realIndex: number, monthIndex: number, newDecisao: number) => {
     setTableData((prev) => {
       let updatedData = [...prev];
-      updatedData[rowIndex].months[monthIndex].decisao = newDecisao;
+      updatedData[realIndex].months[monthIndex].decisao = newDecisao;
       return recalculateSugestao(updatedData);
     });
   };
 
-  const handleGiroChange = (rowIndex: number, monthIndex: number, newGiro: number) => {
+  const handleGiroChange = (realIndex: number, monthIndex: number, newGiro: number) => {
     setTableData((prev) => {
       let updatedData = [...prev];
-      updatedData[rowIndex].months[monthIndex].giro = newGiro;
+      updatedData[realIndex].months[monthIndex].giro = newGiro;
       return recalculateSugestao(updatedData);
     });
   };
+
+  // -------------------------------------------------------
+  // Filtro principal (filteredData)
+  // -------------------------------------------------------
+  const filteredData = tableData.filter((item) => {
+    const matchesVendor = vendor === "All" || item.vendor === vendor;
+    const matchesCat = category === "All" || item.category === category;
+    const matchesOrig = partnOrig === "All" || item.partnOrig === partnOrig;
+    const matchesSS = partnSS === "All" || item.partnSS === partnSS;
+
+    // Filtro de texto
+    const lowerSearch = searchText.toLowerCase();
+    const rowConcatenated = [
+      item.vendor,
+      item.category,
+      item.partnOrig,
+      item.partnSS,
+    ]
+      .join(" ")
+      .toLowerCase();
+    const matchesSearch = !searchText || rowConcatenated.includes(lowerSearch);
+
+    // Filtro de status
+    const rowHasStatus = item.months.some((m: any) => {
+      const statusDoMes = getStatusBySugestao(m.sugestao);
+      return statusFilter === "All" || statusDoMes === statusFilter;
+    });
+
+    return matchesVendor && matchesCat && matchesOrig && matchesSS && matchesSearch && rowHasStatus;
+  });
 
   // -------------------------------------------------------
   // CHAT (MOCK)
@@ -355,15 +382,22 @@ function DashboardPage() {
     setInputValue("");
     setMessages((prev) => [...prev, userMessage]);
     setTimeout(() => {
-      setMessages((prev) => [...prev, { id: Date.now(), sender: "iazzie", text: "Carregando..." }]);
+      setMessages((prev) => [
+        ...prev,
+        { id: Date.now(), sender: "iazzie", text: "Carregando..." },
+      ]);
     }, 400);
   };
 
+  // -------------------------------------------------------
+  // Render
+  // -------------------------------------------------------
   return (
     <>
       {/* FILTROS */}
-       {/* Campo de Busca */}
-       <div className="flex flex-col w-96 ">
+      <div className="flex flex-wrap gap-4 mt-5">
+        {/* Campo de Busca */}
+        <div className="flex flex-col w-40">
           <span className="text-sm font-semibold text-[#EF7925]">Busca</span>
           <Input
             placeholder="Filtrar..."
@@ -372,8 +406,6 @@ function DashboardPage() {
             className="h-8 text-xs"
           />
         </div>
-      <div className="flex flex-wrap gap-4 mt-5">
-       
 
         {/* Vendor */}
         <div className="flex flex-col">
@@ -480,7 +512,7 @@ function DashboardPage() {
           </Select>
         </div>
 
-        {/* Slider para controlar quantos meses são exibidos */}
+        {/* Slider p/ número de meses */}
         <div className="flex flex-col w-40">
           <span className="text-sm font-semibold text-[#EF7925]">Meses</span>
           <Slider
@@ -488,14 +520,11 @@ function DashboardPage() {
             max={12}
             defaultValue={6}
             onChange={(value) => setNumMonthsToShow(value)}
-            // Se quiser mostrar o valor dinamicamente, poderia usar:
-            // value={numMonthsToShow}
-            // marks={{ 1: '1', 6: '6', 12: '12' }}
           />
         </div>
       </div>
 
-      {/* PRIMEIRA TABELA */}
+      {/* TABELA */}
       <Card className="mt-5 p-3 shadow-sm">
         <CardContent className="overflow-x-auto">
           <Table>
@@ -515,7 +544,6 @@ function DashboardPage() {
                 </TableHead>
                 <TableHead className="w-32 text-left">
                   <span className="text-sm font-semibold text-[#EF7925]">Entradas</span>
-                  {/* Aqui limitamos a exibição dos cabeçalhos dos meses pelo slice */}
                   {months.slice(0, numMonthsToShow).map((month) => (
                     <TableHead key={month} className="px-0 w-32 pr-10 text-left">
                       {month}
@@ -535,61 +563,71 @@ function DashboardPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredData.map((row, rowIndex) => (
-                <TableRow key={rowIndex}>
-                  <TableCell className="py-1 text-xs">{row.vendor}</TableCell>
-                  <TableCell className="py-1 text-[10px]">{row.partnOrig}</TableCell>
-                  <TableCell className="py-1 text-[10px]">{row.partnSS}</TableCell>
-                  <TableCell className="py-1 text-[10px]">{row.category}</TableCell>
-                  <TableCell className="pr-10">
-                    <div className="flex gap-7 pl-8 flex-row">
-                      <span className="py-1 text-xs">{row.onHand}</span>
-                      <span className="py-1 pl-4 text-xs">{row.giroMes}</span>
-                      <span className="py-1 pl-2 text-xs">{row.dioAtual}</span>
-                      <span className="py-1 pl-5 text-xs">{row.dioIdeal}</span>
-                      <div className="pl-3">
-                        <Input
-                          type="number"
-                          className="w-16 text-center text-xs"
-                          value={row.leadTime}
-                          onChange={(e) => handleLeadTimeChange(rowIndex, Number(e.target.value))}
-                        />
-                      </div>
-                    </div>
-                  </TableCell>
-
-                  {/* Meses (limitados pelo slice de numMonthsToShow) */}
-                  <div className="flex pl-7 flex-row">
-                    {row.months.slice(0, numMonthsToShow).map((monthData: any, monthIndex: number) => (
-                      <TableCell key={monthIndex} className="p-0 w-full py-2 text-xs">
-                        <div className="flex gap-3 w-full flex-row ">
-                          <span className="py-0 p-0 w-12 text-xs">{monthData.onHandMonth}</span>
-                          <span className="py-0 w-8 text-xs">{monthData.back}</span>
-                          <Input
-                            type="number"
-                            className="w-20 text-center text-xs"
-                            value={monthData.giro}
-                            onChange={(e) => handleGiroChange(rowIndex, monthIndex, Number(e.target.value))}
-                          />
-                          {/* Status */}
-                          <span className="py-0 pl-5 w-40 text-[10px]">
-                            {getStatusBySugestao(monthData.sugestao)}
-                          </span>
-                          <span className="py-0 w-14 text-xs">{monthData.sugestao}</span>
-                          <span className="py-0 w-8 text-xs">{monthData.dio}</span>
+              {filteredData.map((row) => {
+                // IMPORTANT: aqui encontramos o realIndex no tableData original.
+                const realIndex = tableData.findIndex((r) => r.id === row.id);
+                if (realIndex < 0) return null; // Se não achar, não renderiza
+                
+                return (
+                  <TableRow key={row.id}>
+                    <TableCell className="py-1 text-xs">{row.vendor}</TableCell>
+                    <TableCell className="py-1 text-[10px]">{row.partnOrig}</TableCell>
+                    <TableCell className="py-1 text-[10px]">{row.partnSS}</TableCell>
+                    <TableCell className="py-1 text-[10px]">{row.category}</TableCell>
+                    <TableCell className="pr-10">
+                      <div className="flex gap-7 pl-8 flex-row">
+                        <span className="py-1 text-xs">{row.onHand}</span>
+                        <span className="py-1 pl-4 text-xs">{row.giroMes}</span>
+                        <span className="py-1 pl-2 text-xs">{row.dioAtual}</span>
+                        <span className="py-1 pl-5 text-xs">{row.dioIdeal}</span>
+                        <div className="pl-3">
                           <Input
                             type="number"
                             className="w-16 text-center text-xs"
-                            value={monthData.decisao}
-                            onChange={(e) => handleDecisaoChange(rowIndex, monthIndex, Number(e.target.value))}
+                            value={row.leadTime}
+                            onChange={(e) =>
+                              handleLeadTimeChange(realIndex, Number(e.target.value))
+                            }
                           />
-                          <span className="py-0 pl-3 w-20 text-xs">{monthData.dioDec}</span>
                         </div>
-                      </TableCell>
-                    ))}
-                  </div>
-                </TableRow>
-              ))}
+                      </div>
+                    </TableCell>
+
+                    <div className="flex pl-7 flex-row">
+                      {row.months.slice(0, numMonthsToShow).map((monthData: any, monthIndex: number) => (
+                        <TableCell key={monthIndex} className="p-0 w-full py-2 text-xs">
+                          <div className="flex gap-3 w-full flex-row">
+                            <span className="py-0 p-0 w-12 text-xs">{monthData.onHandMonth}</span>
+                            <span className="py-0 w-8 text-xs">{monthData.back}</span>
+                            <Input
+                              type="number"
+                              className="w-20 text-center text-xs"
+                              value={monthData.giro}
+                              onChange={(e) =>
+                                handleGiroChange(realIndex, monthIndex, Number(e.target.value))
+                              }
+                            />
+                            <span className="py-0 pl-5 w-40 text-[10px]">
+                              {getStatusBySugestao(monthData.sugestao)}
+                            </span>
+                            <span className="py-0 w-14 text-xs">{monthData.sugestao}</span>
+                            <span className="py-0 w-8 text-xs">{monthData.dio}</span>
+                            <Input
+                              type="number"
+                              className="w-16 text-center text-xs"
+                              value={monthData.decisao}
+                              onChange={(e) =>
+                                handleDecisaoChange(realIndex, monthIndex, Number(e.target.value))
+                              }
+                            />
+                            <span className="py-0 pl-3 w-20 text-xs">{monthData.dioDec}</span>
+                          </div>
+                        </TableCell>
+                      ))}
+                    </div>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>
