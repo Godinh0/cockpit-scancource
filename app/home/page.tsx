@@ -515,6 +515,26 @@ function DashboardPage() {
           </Select>
         </div>
 
+        {/* Local */}
+        <div className="flex flex-col">
+          <span className="text-sm font-semibold text-[#EF7925]">Local</span>
+          <Select >
+            <SelectTrigger className="w-[180px] h-8 text-xs">
+              <SelectValue placeholder="Filtrar Local" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Status</SelectLabel>
+                <SelectItem value="All">All</SelectItem>
+                <SelectItem value="1">SC</SelectItem>
+                <SelectItem value="2">PRP</SelectItem>
+                <SelectItem value="3">ES</SelectItem>
+                <SelectItem value="4">SPB</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Slider p/ número de meses */}
         <div className="flex flex-col w-40">
           <span className="text-sm font-semibold text-[#EF7925]">Meses</span>
