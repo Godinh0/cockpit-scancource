@@ -395,17 +395,20 @@ function DashboardPage() {
   return (
     <>
       {/* FILTROS */}
+      
+      <div className="flex flex-col w-96">
+        <span className="text-sm font-semibold text-[#EF7925]">Busca</span>
+        <Input
+          placeholder="Filtrar..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          className="h-8 text-xs"
+        />
+      </div>
+
       <div className="flex flex-wrap gap-4 mt-5">
         {/* Campo de Busca */}
-        <div className="flex flex-col w-40">
-          <span className="text-sm font-semibold text-[#EF7925]">Busca</span>
-          <Input
-            placeholder="Filtrar..."
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            className="h-8 text-xs"
-          />
-        </div>
+        
 
         {/* Vendor */}
         <div className="flex flex-col">
