@@ -2,26 +2,12 @@
 
 import React, { useContext, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { Input, Slider } from "antd";
+// ANT Design
+import { Input, Slider, Select } from "antd";
+const { Option } = Select;
 // ShadCN/UI
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { ThemeContext } from "../components/Provider";
 import { FileSpreadsheet } from "lucide-react";
@@ -37,7 +23,10 @@ const WeeklyActivityChartNoSSR = dynamic(
   { ssr: false }
 );
 
-// Função utilitária para retornar o Status pela sugestão
+/**
+ * Função utilitária para converter o valor de sugestão (sugestao)
+ * em um status textual de acordo com a lógica especificada.
+ */
 function getStatusBySugestao(sugestao: number): string {
   if (sugestao > 1000) {
     return "Grande compra necessária";
@@ -56,30 +45,18 @@ function DashboardPage() {
   const theme = useContext(ThemeContext);
 
   // -------------------------------------------------------
-  // Mock de dados com "id" único para cada registro
+  // Mock de dados (iniciais)
   // -------------------------------------------------------
-  const months = [
-    "Jan",
-    "Fev",
-    "Mar",
-    "Abr",
-    "Mai",
-    "Jun",
-    "Jul",
-    "Ago",
-    "Set",
-    "Out",
-    "Nov",
-    "Dez",
-  ];
+  const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
+  // Funções auxiliares para cálculo inicial
   const calculateInitialSugestao = (
     onHand: number,
     giroMes: number,
     leadTime: number,
     back: number
   ): number => {
-    return Math.round(((onHand + back - giroMes) / giroMes) * 30);
+    return Math.round((onHand + back - giroMes) / giroMes * 30);
   };
 
   const calculateInitialDio = (
@@ -89,17 +66,17 @@ function DashboardPage() {
     back: number,
     dioIdeal: number
   ): number => {
-    return Math.round(((onHand + back + sugestao - giroMes) / dioIdeal) * 30);
+    return Math.round((onHand + back + sugestao - giroMes) / dioIdeal * 30);
   };
 
   const calculateInitialDioDec = (dio: number, giroMes: number): number => {
     return Math.round(dio);
   };
 
-  // Agora cada objeto tem um "id" único
+  // Exemplo de dados com um ID único para evitar problemas de "rowIndex"
   const [tableData, setTableData] = useState([
     {
-      id: "row-1", // <--- ID único
+      id: "row-1",
       vendor: "ZEBRA",
       partnOrig: "MC220J-2A3S2RW BR",
       partnSS: "MC220J-2A3S2RW BR_SC",
@@ -126,7 +103,7 @@ function DashboardPage() {
       }),
     },
     {
-      id: "row-2", // <--- ID único
+      id: "row-2",
       vendor: "ZEBRA",
       partnOrig: "MC330L-GE4EG4RW BR",
       partnSS: "MC330L-GE4EG4RW BR_SC",
@@ -153,7 +130,7 @@ function DashboardPage() {
       }),
     },
     {
-      id: "row-3", // <--- ID único
+      id: "row-3",
       vendor: "ZEBRA",
       partnOrig: "MC330L-GJ4EG4RW BR",
       partnSS: "MC330L-GJ4EG4RW BR_SC",
@@ -180,7 +157,7 @@ function DashboardPage() {
       }),
     },
     {
-      id: "row-4", // <--- ID único
+      id: "row-4",
       vendor: "ZEBRA",
       partnOrig: "MC330X-GE4EG4RW BR",
       partnSS: "MC330X-GE4EG4RW BR_SC",
@@ -207,7 +184,7 @@ function DashboardPage() {
       }),
     },
     {
-      id: "row-5", // <--- ID único
+      id: "row-5",
       vendor: "ZEBRA",
       partnOrig: "MC930B-GSEDG4RW",
       partnSS: "MC930B-GSEDG4RW_SC",
@@ -236,22 +213,20 @@ function DashboardPage() {
   ]);
 
   // -------------------------------------------------------
-  // Estados dos Filtros
+  // ESTADOS PARA FILTROS
   // -------------------------------------------------------
   const [vendor, setVendor] = useState("All");
   const [category, setCategory] = useState("All");
   const [partnOrig, setPartnOrig] = useState("All");
   const [partnSS, setPartnSS] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
-
-  // Filtro de texto
   const [searchText, setSearchText] = useState("");
 
-  // Slider: número de meses para exibir
+  // Slider para escolher quantos meses exibir
   const [numMonthsToShow, setNumMonthsToShow] = useState(6);
 
   // -------------------------------------------------------
-  // useMemo para listas de opções únicas
+  // LISTAS DE OPÇÕES ÚNICAS
   // -------------------------------------------------------
   const uniqueVendors = useMemo(() => {
     const setV = new Set(tableData.map((d) => d.vendor));
@@ -274,21 +249,52 @@ function DashboardPage() {
   }, [tableData]);
 
   // -------------------------------------------------------
-  // Funções de Cálculo
+  // LÓGICA DE FILTRO
+  // -------------------------------------------------------
+  const filteredData = tableData.filter((item) => {
+    const matchesVendor = vendor === "All" || item.vendor === vendor;
+    const matchesCat = category === "All" || item.category === category;
+    const matchesOrig = partnOrig === "All" || item.partnOrig === partnOrig;
+    const matchesSS = partnSS === "All" || item.partnSS === partnSS;
+
+    // Filtro de busca textual
+    const lowerSearch = searchText.toLowerCase();
+    const rowConcatenated = [
+      item.vendor,
+      item.category,
+      item.partnOrig,
+      item.partnSS,
+    ].join(" ").toLowerCase();
+    const matchesSearch = !searchText || rowConcatenated.includes(lowerSearch);
+
+    // Filtro de status
+    // Para cada row, verifica se há ao menos um mês que tenha o status selecionado
+    const rowHasStatus = item.months.some((m) => {
+      const statusDoMes = getStatusBySugestao(m.sugestao);
+      return statusFilter === "All" || statusDoMes === statusFilter;
+    });
+
+    return (
+      matchesVendor &&
+      matchesCat &&
+      matchesOrig &&
+      matchesSS &&
+      matchesSearch &&
+      rowHasStatus
+    );
+  });
+
+  // -------------------------------------------------------
+  // FUNÇÕES DE ATUALIZAÇÃO DOS INPUTS (onChange)
   // -------------------------------------------------------
   const recalculateSugestao = (data: any) => {
     return data.map((row: any) => {
       let updatedMonths = row.months.map((m: any) => {
-        let dio = Math.round(
-          (row.onHand + m.back + m.sugestao - row.giroMes) / row.dioIdeal * 30
-        );
+        let dio = Math.round((row.onHand + m.back + m.sugestao - row.giroMes) / row.dioIdeal * 30);
         let dioDec = dio;
         if (m.decisao > 0) {
-          dioDec = Math.round(
-            (row.onHand + m.back + m.decisao - m.giro) / row.giroMes * 30
-          );
+          dioDec = Math.round((row.onHand + m.back + m.decisao - m.giro) / row.giroMes * 30);
         }
-
         return {
           ...m,
           sugestao: Math.round((row.onHand + m.back - m.giro) / row.giroMes * 30),
@@ -297,7 +303,7 @@ function DashboardPage() {
         };
       });
 
-      // Propagação da decisão de forma acumulativa nos meses subsequentes
+      // Propagar a "decisao" de forma acumulativa
       let decisaoAcumulada = 0;
       for (let i = 0; i < updatedMonths.length; i++) {
         updatedMonths[i].sugestao -= decisaoAcumulada;
@@ -308,10 +314,11 @@ function DashboardPage() {
     });
   };
 
-  // *** IMPORTANTE: agora recebemos "realIndex" ao invés de "rowIndex" direto.
+  // Para atualizar o leadTime, giro e decisao, precisamos do índice real no `tableData`.
+  // Ex: "item" => buscar rowIndex real no array principal
   const handleLeadTimeChange = (realIndex: number, newLeadTime: number) => {
     setTableData((prev) => {
-      let updatedData = [...prev];
+      const updatedData = [...prev];
       updatedData[realIndex].leadTime = newLeadTime;
       return recalculateSugestao(updatedData);
     });
@@ -319,7 +326,7 @@ function DashboardPage() {
 
   const handleDecisaoChange = (realIndex: number, monthIndex: number, newDecisao: number) => {
     setTableData((prev) => {
-      let updatedData = [...prev];
+      const updatedData = [...prev];
       updatedData[realIndex].months[monthIndex].decisao = newDecisao;
       return recalculateSugestao(updatedData);
     });
@@ -327,49 +334,17 @@ function DashboardPage() {
 
   const handleGiroChange = (realIndex: number, monthIndex: number, newGiro: number) => {
     setTableData((prev) => {
-      let updatedData = [...prev];
+      const updatedData = [...prev];
       updatedData[realIndex].months[monthIndex].giro = newGiro;
       return recalculateSugestao(updatedData);
     });
   };
 
   // -------------------------------------------------------
-  // Filtro principal (filteredData)
-  // -------------------------------------------------------
-  const filteredData = tableData.filter((item) => {
-    const matchesVendor = vendor === "All" || item.vendor === vendor;
-    const matchesCat = category === "All" || item.category === category;
-    const matchesOrig = partnOrig === "All" || item.partnOrig === partnOrig;
-    const matchesSS = partnSS === "All" || item.partnSS === partnSS;
-
-    // Filtro de texto
-    const lowerSearch = searchText.toLowerCase();
-    const rowConcatenated = [
-      item.vendor,
-      item.category,
-      item.partnOrig,
-      item.partnSS,
-    ]
-      .join(" ")
-      .toLowerCase();
-    const matchesSearch = !searchText || rowConcatenated.includes(lowerSearch);
-
-    // Filtro de status
-    const rowHasStatus = item.months.some((m: any) => {
-      const statusDoMes = getStatusBySugestao(m.sugestao);
-      return statusFilter === "All" || statusDoMes === statusFilter;
-    });
-
-    return matchesVendor && matchesCat && matchesOrig && matchesSS && matchesSearch && rowHasStatus;
-  });
-
-  // -------------------------------------------------------
   // CHAT (MOCK)
   // -------------------------------------------------------
   const chatHistoryMock = ["Relatório de quebra Janeiro", "Relatório saída primeiro semestre"];
-  const [messages, setMessages] = useState([
-    { id: 1, sender: "iazzie", text: "Olá, como posso ajudar?" },
-  ]);
+  const [messages, setMessages] = useState([{ id: 1, sender: "iazzie", text: "Olá, como posso ajudar?" }]);
   const [inputValue, setInputValue] = useState("");
 
   const handleSend = () => {
@@ -382,21 +357,16 @@ function DashboardPage() {
     setInputValue("");
     setMessages((prev) => [...prev, userMessage]);
     setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        { id: Date.now(), sender: "iazzie", text: "Carregando..." },
-      ]);
+      setMessages((prev) => [...prev, { id: Date.now(), sender: "iazzie", text: "Carregando..." }]);
     }, 400);
   };
 
-  // -------------------------------------------------------
-  // Render
-  // -------------------------------------------------------
   return (
     <>
       {/* FILTROS */}
-      
-      <div className="flex flex-col w-96">
+
+      {/* Busca (Input) */}
+      <div className="flex flex-col w-80">
         <span className="text-sm font-semibold text-[#EF7925]">Busca</span>
         <Input
           placeholder="Filtrar..."
@@ -407,135 +377,104 @@ function DashboardPage() {
       </div>
 
       <div className="flex flex-wrap gap-4 mt-5">
-        {/* Campo de Busca */}
         
 
-        {/* Vendor */}
+        {/* Vendor (Select antd) */}
         <div className="flex flex-col">
           <span className="text-sm font-semibold text-[#EF7925]">Vendor</span>
-          <Select onValueChange={setVendor} value={vendor}>
-            <SelectTrigger className="w-[180px] h-8 text-xs">
-              <SelectValue placeholder="Select Vendor" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Vendor</SelectLabel>
-                <SelectItem value="All">All</SelectItem>
-                {uniqueVendors.map((v) => (
-                  <SelectItem key={v} value={v}>
-                    {v}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
+          <Select
+            showSearch
+            value={vendor}
+            onChange={(value) => setVendor(value)}
+            style={{ width: 180 }}
+            size="small"
+          >
+            <Option value="All">All</Option>
+            {uniqueVendors.map((v) => (
+              <Option key={v} value={v}>
+                {v}
+              </Option>
+            ))}
           </Select>
         </div>
 
-        {/* Categoria */}
+        {/* Categoria (Select antd) */}
         <div className="flex flex-col">
           <span className="text-sm font-semibold text-[#EF7925]">Categoria</span>
-          <Select onValueChange={setCategory} value={category}>
-            <SelectTrigger className="w-[180px] h-8 text-xs">
-              <SelectValue placeholder="Select Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Categoria</SelectLabel>
-                <SelectItem value="All">All</SelectItem>
-                {uniqueCategories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
+          <Select
+            showSearch
+            value={category}
+            onChange={(value) => setCategory(value)}
+            style={{ width: 180 }}
+            size="small"
+          >
+            <Option value="All">All</Option>
+            {uniqueCategories.map((cat) => (
+              <Option key={cat} value={cat}>
+                {cat}
+              </Option>
+            ))}
           </Select>
         </div>
 
-        {/* PARTN ORIG */}
+        {/* PARTN ORIG (Select antd) */}
         <div className="flex flex-col">
           <span className="text-sm font-semibold text-[#EF7925]">PARTN ORIG</span>
-          <Select onValueChange={setPartnOrig} value={partnOrig}>
-            <SelectTrigger className="w-[180px] h-8 text-xs">
-              <SelectValue placeholder="Select PARTN ORIG" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>PARTN ORIG</SelectLabel>
-                <SelectItem value="All">All</SelectItem>
-                {uniquePartnOrigs.map((o) => (
-                  <SelectItem key={o} value={o}>
-                    {o}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
+          <Select
+            showSearch
+            value={partnOrig}
+            onChange={(value) => setPartnOrig(value)}
+            style={{ width: 180 }}
+            size="small"
+          >
+            <Option value="All">All</Option>
+            {uniquePartnOrigs.map((o) => (
+              <Option key={o} value={o}>
+                {o}
+              </Option>
+            ))}
           </Select>
         </div>
 
-        {/* PARTN SS */}
+        {/* PARTN SS (Select antd) */}
         <div className="flex flex-col">
           <span className="text-sm font-semibold text-[#EF7925]">PARTN SS</span>
-          <Select onValueChange={setPartnSS} value={partnSS}>
-            <SelectTrigger className="w-[180px] h-8 text-xs">
-              <SelectValue placeholder="Select PARTN SS" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>PARTN SS</SelectLabel>
-                <SelectItem value="All">All</SelectItem>
-                {uniquePartnSSs.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
+          <Select
+            showSearch
+            value={partnSS}
+            onChange={(value) => setPartnSS(value)}
+            style={{ width: 180 }}
+            size="small"
+          >
+            <Option value="All">All</Option>
+            {uniquePartnSSs.map((s) => (
+              <Option key={s} value={s}>
+                {s}
+              </Option>
+            ))}
           </Select>
         </div>
 
-        {/* Status */}
+        {/* Status (Select antd) */}
         <div className="flex flex-col">
           <span className="text-sm font-semibold text-[#EF7925]">Status</span>
-          <Select onValueChange={setStatusFilter} value={statusFilter}>
-            <SelectTrigger className="w-[180px] h-8 text-xs">
-              <SelectValue placeholder="Filtrar Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Status</SelectLabel>
-                <SelectItem value="All">All</SelectItem>
-                <SelectItem value="Grande compra necessária">Grande compra necessária</SelectItem>
-                <SelectItem value="Compra de médio porte">Compra de médio porte</SelectItem>
-                <SelectItem value="Pequena compra necessária">Pequena compra necessária</SelectItem>
-                <SelectItem value="Sem necessidade de compra">Sem necessidade de compra</SelectItem>
-                <SelectItem value="Reduzir estoque atual">Reduzir estoque atual</SelectItem>
-              </SelectGroup>
-            </SelectContent>
+          <Select
+            showSearch
+            value={statusFilter}
+            onChange={(val) => setStatusFilter(val)}
+            style={{ width: 180 }}
+            size="small"
+          >
+            <Option value="All">All</Option>
+            <Option value="Grande compra necessária">Grande compra necessária</Option>
+            <Option value="Compra de médio porte">Compra de médio porte</Option>
+            <Option value="Pequena compra necessária">Pequena compra necessária</Option>
+            <Option value="Sem necessidade de compra">Sem necessidade de compra</Option>
+            <Option value="Reduzir estoque atual">Reduzir estoque atual</Option>
           </Select>
         </div>
 
-        {/* Local */}
-        <div className="flex flex-col">
-          <span className="text-sm font-semibold text-[#EF7925]">Local</span>
-          <Select >
-            <SelectTrigger className="w-[180px] h-8 text-xs">
-              <SelectValue placeholder="Filtrar Local" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Status</SelectLabel>
-                <SelectItem value="All">All</SelectItem>
-                <SelectItem value="1">SC</SelectItem>
-                <SelectItem value="2">PRP</SelectItem>
-                <SelectItem value="3">ES</SelectItem>
-                <SelectItem value="4">SPB</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Slider p/ número de meses */}
+        {/* Slider p/ quantidade de meses */}
         <div className="flex flex-col w-40">
           <span className="text-sm font-semibold text-[#EF7925]">Meses</span>
           <Slider
@@ -547,7 +486,7 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* TABELA */}
+      {/* PRIMEIRA TABELA */}
       <Card className="mt-5 p-3 shadow-sm">
         <CardContent className="overflow-x-auto">
           <Table>
@@ -567,6 +506,7 @@ function DashboardPage() {
                 </TableHead>
                 <TableHead className="w-32 text-left">
                   <span className="text-sm font-semibold text-[#EF7925]">Entradas</span>
+                  {/* Limitando a exibição dos meses */}
                   {months.slice(0, numMonthsToShow).map((month) => (
                     <TableHead key={month} className="px-0 w-32 pr-10 text-left">
                       {month}
@@ -587,10 +527,10 @@ function DashboardPage() {
             </TableHeader>
             <TableBody>
               {filteredData.map((row) => {
-                // IMPORTANT: aqui encontramos o realIndex no tableData original.
+                // Encontrar o índice real no array tableData
                 const realIndex = tableData.findIndex((r) => r.id === row.id);
-                if (realIndex < 0) return null; // Se não achar, não renderiza
-                
+                if (realIndex < 0) return null;
+
                 return (
                   <TableRow key={row.id}>
                     <TableCell className="py-1 text-xs">{row.vendor}</TableCell>
@@ -617,10 +557,12 @@ function DashboardPage() {
                     </TableCell>
 
                     <div className="flex pl-7 flex-row">
-                      {row.months.slice(0, numMonthsToShow).map((monthData: any, monthIndex: number) => (
+                      {row.months.slice(0, numMonthsToShow).map((monthData, monthIndex) => (
                         <TableCell key={monthIndex} className="p-0 w-full py-2 text-xs">
                           <div className="flex gap-3 w-full flex-row">
-                            <span className="py-0 p-0 w-12 text-xs">{monthData.onHandMonth}</span>
+                            <span className="py-0 p-0 w-12 text-xs">
+                              {monthData.onHandMonth}
+                            </span>
                             <span className="py-0 w-8 text-xs">{monthData.back}</span>
                             <Input
                               type="number"
