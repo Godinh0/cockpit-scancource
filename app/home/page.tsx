@@ -94,7 +94,12 @@ function DashboardPage() {
     leadTime: number,
     back: number
   ): number => {
-    return Math.round(((onHand + back - giroMes) / giroMes) * 30);
+    const result = Math.round(((onHand + back - giroMes) / giroMes) * 30)
+    if (result < 0){
+      return 0
+    } else {
+     return result;
+    }
   };
 
   const calculateInitialDio = (
@@ -350,56 +355,69 @@ function DashboardPage() {
   // recalculateSugestao
   // -------------------------------------------------------
   // Agora, além de recalcular 'sugestao', 'dio', etc., recalculamos 'status'
-  const recalculateSugestao = (data: any) => {
+  function recalculateSugestao(data: any) {
     return data.map((row: any) => {
-      let updatedMonths = row.months.map((m: any) => {
-        // 1) Calcula dio
+      let updatedMonths = [...row.months];
+      let decisaoAcumulada = 0;
+  
+      for (let i = 0; i < updatedMonths.length; i++) {
+        const m = updatedMonths[i];
+  
+        // 1) Calcular 'dio'
         let dio = Math.round(
           (row.onHand + m.back + m.sugestao - row.giroMes) / row.dioIdeal * 30
         );
-
-        // 2) Calcula dioDec
+  
+        // 2) Calcular 'dioDec'
         let dioDec = dio;
         if (m.decisao > 0) {
           dioDec = Math.round(
             (row.onHand + m.back + m.decisao - m.giro) / row.giroMes * 30
           );
         }
-
-        // 3) Recalcula sugestao
-        const newSugestao = Math.round(
+  
+        // 3) Calcular 'newSugestao' com base no 'row.onHand', mas ainda sem aplicar a decisão passada
+        let newSugestao = Math.round(
           (row.onHand + m.back - m.giro) / row.giroMes * 30
         );
-
-        // 4) Recalcula status chamando getNewStatus
-        const newStatus = getNewStatus({
-          onHand: m.onHandMonth,
-          back: m.back,
-          giro: m.giro,
-          dio,
-          leadTime: row.leadTime,
-        });
-
-        return {
+  
+        // 4) Subtrai a 'decisaoAcumulada' do(s) meses anteriores
+        //    Isso faz a sugestão do mês atual refletir a soma das decisões passadas
+        newSugestao = newSugestao - decisaoAcumulada;
+  
+        // 5) Se a sugestão ficar abaixo de zero, zere-a e configure status = "ANTECIPAR BACKLOG"
+        //    Senão, calculamos o status normalmente via getNewStatus
+        let newStatus = "";
+        if (newSugestao < 0) {
+          newSugestao = 0;
+          newStatus = "ANTECIPAR BACKLOG";
+        } else {
+          newStatus = getNewStatus({
+            onHand: m.onHandMonth, // ou (m.onHandMonth - m.giro) se preferir
+            back: m.back,
+            giro: m.giro,
+            dio,
+            leadTime: row.leadTime,
+          });
+        }
+  
+        // 6) Atualizar no array
+        updatedMonths[i] = {
           ...m,
           sugestao: newSugestao,
           dio,
           dioDec,
           status: newStatus,
         };
-      });
-
-      // 5) Propagar "decisao" de forma acumulativa (se for parte da sua lógica)
-      let decisaoAcumulada = 0;
-      for (let i = 0; i < updatedMonths.length; i++) {
-        updatedMonths[i].sugestao -= decisaoAcumulada;
-        decisaoAcumulada += updatedMonths[i].decisao;
+  
+        // 7) Por fim, some a decisão do MÊS atual ao 'decisaoAcumulada',
+        //    para que ela afete o mês seguinte
+        decisaoAcumulada += m.decisao;
       }
-
+  
       return { ...row, months: updatedMonths };
     });
-  };
-
+  }
   // -------------------------------------------------------
   // Handlers de leadTime, decisao, giro
   // -------------------------------------------------------
@@ -430,7 +448,7 @@ function DashboardPage() {
   // -------------------------------------------------------
   // MOCK do CHAT
   // -------------------------------------------------------
-  const chatHistoryMock = ["Relatório de quebra Janeiro", "Relatório saída primeiro semestre"];
+  const chatHistoryMock = ["POSIÇÃO ATUAL", "RELATÓRIO DE COMPRAS", "RELATÓRIO DE AGING", "RELATÓRIO DE STOCK OUT " ];
   const [messages, setMessages] = useState([
     { id: 1, sender: "iazzie", text: "Olá, como posso ajudar?" },
   ]);
@@ -554,9 +572,9 @@ function DashboardPage() {
             <Option value="ESTOQUE OK">ESTOQUE OK</Option>
             <Option value="ALERTA AGING">ALERTA AGING</Option>
             <Option value="RUPTURA DE ESTOQUE">RUPTURA DE ESTOQUE</Option>
-            <Option value="RUPTURA DE ESTOQUE">POSTERGAR BACKLOGE</Option>
-            <Option value="RUPTURA DE ESTOQUE">ANTECIPAR BACKLOGE</Option>
-            <Option value="RUPTURA DE ESTOQUE">BAIXO GIRO</Option>
+            <Option value="POSTERGAR BACKLO">POSTERGAR BACKLOG</Option>
+            <Option value="ANTECIPAR BACKLOG">ANTECIPAR BACKLOG</Option>
+            <Option value="BAIXO GIRO">BAIXO GIRO</Option>
           </Select>
         </div>
 
@@ -585,7 +603,7 @@ function DashboardPage() {
                   <TableHead className="py-0 w-16">DIO Ideal</TableHead>
                   <TableHead className="py-0 w-16">Lead Time</TableHead>
                 </TableHead>
-                <TableHead className=" p-0  text-left">
+                <TableHead className=" p-0 pl-5  text-left">
                   <span className="text-sm font-semibold text-[#EF7925]">Entradas</span>
                   {months.slice(0, numMonthsToShow).map((month) => (
                     <TableHead key={month} className="px-0 pl-0 w-32 pr-10 text-left">
@@ -618,7 +636,7 @@ function DashboardPage() {
                     <TableCell className="py-1 text-[10px]">{row.partnSS}</TableCell>
                     <TableCell className="py-1 text-[10px]">{row.category}</TableCell>
                     <TableCell className="">
-                      <div className="flex gap-7 pl-8 flex-row">
+                      <div className="flex gap-7 pl-8  flex-row">
                         <span className="py-1 text-xs">{row.onHand}</span>
                         <span className="py-1 pl-4 text-xs">{row.giroMes}</span>
                         <span className="py-1 pl-2 text-xs">{row.dioAtual}</span>
@@ -636,9 +654,9 @@ function DashboardPage() {
                       </div>
                     </TableCell>
 
-                    <div className="flex flex-row">
+                    <div className="flex pl-3 flex-row ">
                       {row.months.slice(0, numMonthsToShow).map((monthData: any, monthIndex: number) => (
-                        <TableCell key={monthIndex} className="p-0 w-full py-2 text-xs">
+                        <TableCell key={monthIndex} className="p-0 w-full py-2 text-xs  pl-2">
                           <div className="flex gap-3 w-full flex-row">
                             <span className="py-0 p-0 w-12 text-xs">{monthData.onHandMonth}</span>
                             <span className="py-0 w-8 text-xs">{monthData.back}</span>
@@ -698,7 +716,7 @@ function DashboardPage() {
               + Nova Conversa
             </button>
             <hr className="my-2" />
-            <div className="text-xs font-semibold text-[#2D2D2D] mb-2">Histórico</div>
+            <div className="text-xs font-semibold text-[#2D2D2D] mb-2">Relatórios</div>
             <div className="flex-1 overflow-auto">
               {chatHistoryMock.map((item, index) => (
                 <div
