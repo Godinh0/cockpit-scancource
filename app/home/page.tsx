@@ -625,7 +625,7 @@ function DashboardPage() {
               >
                 Categoria
               </TableHead>
-                <TableHead className="w-32 pl-10 pb-5 text-left">
+                <TableHead className="sticky left-[612px] z-20 bg-white w-32 pl-10 pb-5 text-left">
                   <span className="text-sm font-semibold text-[#EF7925]">Atual</span>
                   <TableHead className="p-0 w-10">OnHand</TableHead>
                   <TableHead className="py-0 pl-6 w-16">Giro Mês</TableHead>
@@ -687,7 +687,7 @@ function DashboardPage() {
                       >
                         {row.category}
                       </TableCell>
-                    <TableCell className="">
+                    <TableCell className="sticky left-[612px] z-10 bg-white">
                       <div className="flex gap-7 pl-8  flex-row">
                         <span className="py-1 text-xs">{row.onHand}</span>
                         <span className="py-1 pl-4 text-xs">{row.giroMes}</span>
