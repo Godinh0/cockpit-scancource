@@ -33,12 +33,23 @@ const WeeklyActivityChartNoSSR = dynamic(
  * Função que retorna o status para cada mês, com base em onHand, back, giro, dio, leadTime etc.
  * Ajuste as regras conforme sua necessidade.
  */
-function getNewStatus({ onHand, back, giro, dio, leadTime }) {
+function getNewStatus({
+  onHand,
+  back,
+  giro,
+  dio,
+  leadTime,
+}: {
+  onHand: number;
+  back: number;
+  giro: number;
+  dio: number;
+  leadTime: number;
+}): string {
   const total = onHand + back;
   const ratio = giro > 0 ? total / giro : 0;
-  const leadRatio = leadTime / 30; // Exemplo: converter leadTime (dias) para "meses"
+  const leadRatio = leadTime / 30; 
 
-  // Exemplo de regras (adapte conforme sua necessidade):
   if (total < giro && ratio < leadRatio) {
     return "COMPRA IMEDIATA";
   } else if (total >= giro && ratio < 3) {
@@ -48,9 +59,10 @@ function getNewStatus({ onHand, back, giro, dio, leadTime }) {
   } else if (total < giro && ratio > leadRatio) {
     return "RUPTURA DE ESTOQUE";
   }
-  // Caso não se encaixe em nenhuma das acima, retorne string vazia ou outro status
+
   return "";
 }
+
 
 function DashboardPage() {
   const theme = useContext(ThemeContext);
