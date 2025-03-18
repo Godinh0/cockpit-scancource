@@ -437,6 +437,14 @@ function DashboardPage() {
     });
   };
 
+  const handleDioIdealChange = (realIndex: number, newDioIdeal: number) => {
+    setTableData((prev) => {
+      let updatedData = [...prev];
+      updatedData[realIndex].dioIdeal = newDioIdeal;
+      return recalculateSugestao(updatedData);
+    });
+  };
+
   const handleGiroChange = (realIndex: number, monthIndex: number, newGiro: number) => {
     setTableData((prev) => {
       let updatedData = [...prev];
@@ -591,10 +599,32 @@ function DashboardPage() {
           <Table>
             <TableHeader>
               <TableRow className="h-5 text-xs">
-                <TableHead className="py-0 w-24">Vendor</TableHead>
-                <TableHead className="py-0 w-52">PARTN ORIG</TableHead>
-                <TableHead className="py-0 w-52">PARTN SS</TableHead>
-                <TableHead className="py-0 w-32">Categoria</TableHead>
+              <TableHead
+                className="sticky left-0 z-20 bg-white py-0 w-24 min-w-[96px]"
+              >
+                Vendor
+              </TableHead>
+
+              {/* PARTN ORIG */}
+              <TableHead
+                className="sticky left-[96px] z-20 bg-white py-0 w-52 min-w-[208px]"
+              >
+                PARTN ORIG
+              </TableHead>
+
+              {/* PARTN SS */}
+              <TableHead
+                className="sticky left-[304px] z-20 bg-white py-0 w-52 min-w-[208px]"
+              >
+                PARTN SS
+              </TableHead>
+
+              {/* Categoria */}
+              <TableHead
+                className="sticky left-[512px] z-20 bg-white py-0 w-32 min-w-[128px]"
+              >
+                Categoria
+              </TableHead>
                 <TableHead className="w-32 pl-10 pb-5 text-left">
                   <span className="text-sm font-semibold text-[#EF7925]">Atual</span>
                   <TableHead className="p-0 w-10">OnHand</TableHead>
@@ -631,16 +661,47 @@ function DashboardPage() {
 
                 return (
                   <TableRow key={row.id}>
-                    <TableCell className="py-1 text-xs">{row.vendor}</TableCell>
-                    <TableCell className="py-1 text-[10px]">{row.partnOrig}</TableCell>
-                    <TableCell className="py-1 text-[10px]">{row.partnSS}</TableCell>
-                    <TableCell className="py-1 text-[10px]">{row.category}</TableCell>
+                     <TableCell
+                        className="sticky left-0 z-10 bg-white py-1 text-xs w-24 min-w-[96px]"
+                      >
+                        {row.vendor}
+                      </TableCell>
+
+                      {/* PARTN ORIG */}
+                      <TableCell
+                        className="sticky left-[96px] z-10 bg-white py-1 text-[10px] w-52 min-w-[208px]"
+                      >
+                        {row.partnOrig}
+                      </TableCell>
+
+                      {/* PARTN SS */}
+                      <TableCell
+                        className="sticky left-[304px] z-10 bg-white py-1 text-[10px] w-52 min-w-[208px]"
+                      >
+                        {row.partnSS}
+                      </TableCell>
+
+                      {/* Categoria */}
+                      <TableCell
+                        className="sticky left-[512px] z-10 bg-white py-1 text-[10px] w-32 min-w-[128px]"
+                      >
+                        {row.category}
+                      </TableCell>
                     <TableCell className="">
                       <div className="flex gap-7 pl-8  flex-row">
                         <span className="py-1 text-xs">{row.onHand}</span>
                         <span className="py-1 pl-4 text-xs">{row.giroMes}</span>
                         <span className="py-1 pl-2 text-xs">{row.dioAtual}</span>
-                        <span className="py-1 pl-5 text-xs">{row.dioIdeal}</span>
+                        <div className="pl-3">
+                          <Input
+                            type="number"
+                            className="w-16 text-center text-xs"
+                            value={row.dioIdeal}
+                            onChange={(e) =>
+                              handleDioIdealChange(realIndex, Number(e.target.value))
+                            }
+                          />
+                        </div>
                         <div className="pl-3">
                           <Input
                             type="number"
